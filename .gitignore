@@ -1,0 +1,17 @@
+# Ambiente
+.env
+*.local
+
+# Backend (Maven/Java)
+backend/target/
+
+# Frontend (Node/Vite)
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+
+# Editor
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store

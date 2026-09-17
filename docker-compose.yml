@@ -1,0 +1,14 @@
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: ${DB_NAME:-perimetro}
+      POSTGRES_USER: ${DB_USER:-perimetro}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-perimetro}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - perimetro_postgres_data:/var/lib/postgresql/data
+
+volumes:
+  perimetro_postgres_data:
