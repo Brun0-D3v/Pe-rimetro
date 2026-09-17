@@ -34,10 +34,10 @@ export default function Hero() {
           >
             <Link
               to="/app"
-              className="group inline-flex items-center gap-2 self-start rounded-full bg-primary py-1 pl-5 pr-1 text-sm font-medium text-white transition-colors duration-base ease-reveal hover:bg-primary-hover"
+              className="group inline-flex items-center gap-2 self-start rounded-full bg-primary py-1 pl-5 pr-1 text-sm font-medium text-white transition-colors duration-fast ease-reveal hover:bg-primary-hover"
             >
               Acessar o mapa
-              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-base-1 transition-transform duration-base ease-reveal group-hover:scale-110">
+              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-base-1 transition-transform duration-fast ease-reveal group-hover:scale-110">
                 <ArrowRight className="h-4 w-4 text-white" />
               </span>
             </Link>

@@ -8,7 +8,7 @@ export default function Button({ variante = "primario", className = "", ...props
   return (
     <button
       className={[
-        "inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-colors duration-base ease-reveal disabled:cursor-not-allowed disabled:opacity-50",
+        "inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-colors duration-fast ease-reveal disabled:cursor-not-allowed disabled:opacity-50",
         variantes[variante],
         className,
       ].join(" ")}

@@ -15,7 +15,7 @@ export default function LandingNavbar() {
           <a
             key={item.href}
             href={item.href}
-            className="hidden text-xs text-texto-mute transition-colors duration-base ease-reveal hover:text-white sm:inline-block sm:text-sm"
+            className="hidden text-xs text-texto-mute transition-colors duration-fast ease-reveal hover:text-white sm:inline-block sm:text-sm"
           >
             {item.rotulo}
           </a>
@@ -23,7 +23,7 @@ export default function LandingNavbar() {
 
         <Link
           to="/app"
-          className="rounded-full bg-primary px-3 py-1.5 text-xs font-medium text-white transition-colors duration-base ease-reveal hover:bg-primary-hover sm:text-sm"
+          className="rounded-full bg-primary px-3 py-1.5 text-xs font-medium text-white transition-colors duration-fast ease-reveal hover:bg-primary-hover sm:text-sm"
         >
           Acessar o mapa
         </Link>
