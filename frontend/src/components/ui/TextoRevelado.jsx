@@ -1,10 +1,5 @@
-import { motion, useInView } from "framer-motion";
+import { motion, useInView, useReducedMotion } from "framer-motion";
 import { useRef } from "react";
-
-function prefereMovimentoReduzido() {
-  if (typeof window === "undefined" || !window.matchMedia) return false;
-  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-}
 
 function dividirEmPalavras(segmentos) {
   const palavras = [];
@@ -19,11 +14,11 @@ function dividirEmPalavras(segmentos) {
 export default function TextoRevelado({ texto, segmentos, className = "", style }) {
   const ref = useRef(null);
   const estaVisivel = useInView(ref, { once: true });
-  const reduzirMovimento = prefereMovimentoReduzido();
-  const palavras = dividirEmPalavras(segmentos ?? [{ texto }]);
+  const reduzirMovimento = useReducedMotion();
+  const palavras = dividirEmPalavras(segmentos ?? [{ texto: texto ?? "" }]);
 
   return (
-    <div ref={ref} className={`inline-flex flex-wrap ${className}`} style={style}>
+    <span ref={ref} className={`inline-flex flex-wrap ${className}`} style={style}>
       {palavras.map(({ palavra, className: classeSegmento }, indice) => (
         <motion.span
           key={`${palavra}-${indice}`}
@@ -35,11 +30,11 @@ export default function TextoRevelado({ texto, segmentos, className = "", style 
             ease: [0.16, 1, 0.3, 1],
           }}
           className={`inline-block ${classeSegmento ?? ""}`}
-          style={{ marginRight: "0.25em" }}
+          style={{ marginRight: indice === palavras.length - 1 ? undefined : "0.25em" }}
         >
           {palavra}
         </motion.span>
       ))}
-    </div>
+    </span>
   );
 }

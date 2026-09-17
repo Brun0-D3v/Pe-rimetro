@@ -19,7 +19,7 @@ function itemClasse({ isActive }) {
 
 export default function AppNavbar() {
   return (
-    <nav className="fixed left-1/2 top-4 z-40 -translate-x-1/2">
+    <nav aria-label="Navegação principal" className="fixed left-1/2 top-4 z-40 -translate-x-1/2">
       <div className="flex items-center gap-1 rounded-full border border-base-4 bg-primary-surface px-2 py-2 shadow-lg">
         {links.map(({ to, label, icon: Icon, end }) => (
           <NavLink key={to} to={to} end={end} className={itemClasse} title={label}>

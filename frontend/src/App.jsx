@@ -1,4 +1,4 @@
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import Layout from "./components/Layout";
 import Landing from "./pages/Landing";
 import Avaliacao from "./pages/Avaliacao";
@@ -17,6 +17,7 @@ export default function App() {
           <Route path="ocorrencia" element={<Ocorrencia />} />
           <Route path="dashboard" element={<Dashboard />} />
         </Route>
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
   );

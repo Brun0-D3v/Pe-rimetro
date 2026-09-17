@@ -13,7 +13,7 @@ export default function ComoFunciona() {
   return (
     <section id="como-funciona" className="mx-auto max-w-5xl px-4 py-24 sm:px-6">
       <h2 className="text-center text-display-md font-semibold text-white">
-        <TextoRevelado texto="Seis dimensões, um índice" />
+        <TextoRevelado texto="Seis dimensões, um índice" className="justify-center" />
       </h2>
 
       <div className="mt-12 grid grid-cols-2 gap-4 sm:grid-cols-3">

@@ -18,8 +18,8 @@ export default function Hero() {
         <div className="flex max-w-md flex-col gap-5 lg:pb-4">
           <motion.p
             initial={reduzirMovimento ? false : { y: 20, opacity: 0 }}
-            animate={reduzirMovimento ? { y: 0, opacity: 1 } : { y: 0, opacity: 1 }}
-            transition={{ duration: 0.8, delay: reduzirMovimento ? 0 : 0.5, ease: [0.16, 1, 0.3, 1] }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
             className="text-sm text-texto-mute md:text-base"
           >
             O Pé-rímetro transforma a experiência de quem caminha pela cidade
@@ -29,8 +29,8 @@ export default function Hero() {
 
           <motion.div
             initial={reduzirMovimento ? false : { y: 20, opacity: 0 }}
-            animate={reduzirMovimento ? { y: 0, opacity: 1 } : { y: 0, opacity: 1 }}
-            transition={{ duration: 0.8, delay: reduzirMovimento ? 0 : 0.7, ease: [0.16, 1, 0.3, 1] }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.7, ease: [0.16, 1, 0.3, 1] }}
           >
             <Link
               to="/app"
