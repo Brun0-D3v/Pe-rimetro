@@ -1,9 +1,11 @@
-import { motion } from "framer-motion";
+import { motion, useReducedMotion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import TextoRevelado from "../ui/TextoRevelado";
 
 export default function Hero() {
+  const reduzirMovimento = useReducedMotion();
+
   return (
     <section className="relative flex h-screen w-full items-end overflow-hidden bg-gradient-to-b from-primary-surface to-base-1">
       <div className="noise-overlay pointer-events-none absolute inset-0 opacity-[0.06] mix-blend-overlay" />
@@ -15,9 +17,9 @@ export default function Hero() {
 
         <div className="flex max-w-md flex-col gap-5 lg:pb-4">
           <motion.p
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
+            initial={reduzirMovimento ? false : { y: 20, opacity: 0 }}
+            animate={reduzirMovimento ? { y: 0, opacity: 1 } : { y: 0, opacity: 1 }}
+            transition={{ duration: 0.8, delay: reduzirMovimento ? 0 : 0.5, ease: [0.16, 1, 0.3, 1] }}
             className="text-sm text-texto-mute md:text-base"
           >
             O Pé-rímetro transforma a experiência de quem caminha pela cidade
@@ -26,9 +28,9 @@ export default function Hero() {
           </motion.p>
 
           <motion.div
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.7, ease: [0.16, 1, 0.3, 1] }}
+            initial={reduzirMovimento ? false : { y: 20, opacity: 0 }}
+            animate={reduzirMovimento ? { y: 0, opacity: 1 } : { y: 0, opacity: 1 }}
+            transition={{ duration: 0.8, delay: reduzirMovimento ? 0 : 0.7, ease: [0.16, 1, 0.3, 1] }}
           >
             <Link
               to="/app"
