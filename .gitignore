@@ -15,3 +15,6 @@ frontend/dist-ssr/
 !.vscode/extensions.json
 .idea
 .DS_Store
+
+# Worktrees de agente (scratch, não versionado)
+.claude/worktrees/
