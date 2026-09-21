@@ -3,6 +3,7 @@ package br.com.perimetro.dto;
 import br.com.perimetro.entity.AtivoInativo;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 import java.util.List;
 import java.util.UUID;
@@ -10,6 +11,7 @@ import java.util.UUID;
 public class TrechoRequestDto {
 
     @NotBlank(message = "nome é obrigatório")
+    @Size(max = 150, message = "nome deve ter no máximo 150 caracteres")
     private final String nome;
 
     @NotNull(message = "geometria é obrigatória")
