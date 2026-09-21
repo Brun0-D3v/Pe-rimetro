@@ -107,6 +107,70 @@ class TrechoServiceTest {
     }
 
     @Test
+    void buscaTrechoPorIdExistente() {
+        UUID id = UUID.randomUUID();
+        Regiao regiao = new Regiao("Centro");
+        Trecho trecho = new Trecho("Rua A", GEOMETRIA_EXEMPLO, -23.55, -46.63, AtivoInativo.ATIVO, regiao);
+        TrechoRepository trechoRepository = mock(TrechoRepository.class);
+        RegiaoRepository regiaoRepository = mock(RegiaoRepository.class);
+        when(trechoRepository.findById(id)).thenReturn(Optional.of(trecho));
+        TrechoService service = new TrechoService(trechoRepository, regiaoRepository);
+
+        TrechoResponseDto resultado = service.buscarPorId(id);
+
+        assertThat(resultado.getNome()).isEqualTo("Rua A");
+    }
+
+    @Test
+    void atualizaTrechoExistente() {
+        UUID id = UUID.randomUUID();
+        UUID regiaoId = UUID.randomUUID();
+        Regiao regiao = new Regiao("Centro");
+        Trecho trecho = new Trecho("Rua A", GEOMETRIA_EXEMPLO, -23.55, -46.63, AtivoInativo.ATIVO, regiao);
+        TrechoRepository trechoRepository = mock(TrechoRepository.class);
+        RegiaoRepository regiaoRepository = mock(RegiaoRepository.class);
+        when(trechoRepository.findById(id)).thenReturn(Optional.of(trecho));
+        when(regiaoRepository.findById(regiaoId)).thenReturn(Optional.of(regiao));
+        when(trechoRepository.save(any(Trecho.class))).thenAnswer(chamada -> chamada.getArgument(0));
+        TrechoService service = new TrechoService(trechoRepository, regiaoRepository);
+
+        TrechoResponseDto resultado = service.atualizar(id, new TrechoRequestDto(
+                "Rua das Flores Atualizada", GEOMETRIA_EXEMPLO, -23.56, -46.64, regiaoId, AtivoInativo.INATIVO));
+
+        assertThat(resultado.getNome()).isEqualTo("Rua das Flores Atualizada");
+        assertThat(resultado.getStatus()).isEqualTo(AtivoInativo.INATIVO);
+    }
+
+    @Test
+    void lancaExcecaoAoAtualizarTrechoComRegiaoInexistente() {
+        UUID id = UUID.randomUUID();
+        UUID regiaoId = UUID.randomUUID();
+        Regiao regiao = new Regiao("Centro");
+        Trecho trecho = new Trecho("Rua A", GEOMETRIA_EXEMPLO, -23.55, -46.63, AtivoInativo.ATIVO, regiao);
+        TrechoRepository trechoRepository = mock(TrechoRepository.class);
+        RegiaoRepository regiaoRepository = mock(RegiaoRepository.class);
+        when(trechoRepository.findById(id)).thenReturn(Optional.of(trecho));
+        when(regiaoRepository.findById(regiaoId)).thenReturn(Optional.empty());
+        TrechoService service = new TrechoService(trechoRepository, regiaoRepository);
+
+        assertThatThrownBy(() -> service.atualizar(id, new TrechoRequestDto(
+                "Rua das Flores", GEOMETRIA_EXEMPLO, -23.55, -46.63, regiaoId, null)))
+                .isInstanceOf(RegiaoNaoEncontradaException.class);
+    }
+
+    @Test
+    void lancaExcecaoAoRemoverTrechoInexistente() {
+        UUID id = UUID.randomUUID();
+        TrechoRepository trechoRepository = mock(TrechoRepository.class);
+        RegiaoRepository regiaoRepository = mock(RegiaoRepository.class);
+        when(trechoRepository.existsById(id)).thenReturn(false);
+        TrechoService service = new TrechoService(trechoRepository, regiaoRepository);
+
+        assertThatThrownBy(() -> service.deletar(id))
+                .isInstanceOf(TrechoNaoEncontradoException.class);
+    }
+
+    @Test
     void removeTrechoExistente() {
         UUID id = UUID.randomUUID();
         TrechoRepository trechoRepository = mock(TrechoRepository.class);
