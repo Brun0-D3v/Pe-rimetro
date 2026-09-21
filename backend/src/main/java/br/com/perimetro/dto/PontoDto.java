@@ -1,11 +1,15 @@
 package br.com.perimetro.dto;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class PontoDto {
 
     private final double lat;
     private final double lng;
 
-    public PontoDto(double lat, double lng) {
+    @JsonCreator
+    public PontoDto(@JsonProperty("lat") double lat, @JsonProperty("lng") double lng) {
         this.lat = lat;
         this.lng = lng;
     }

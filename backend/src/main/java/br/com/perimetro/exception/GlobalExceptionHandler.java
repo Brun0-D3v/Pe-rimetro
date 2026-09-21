@@ -1,6 +1,8 @@
 package br.com.perimetro.exception;
 
 import br.com.perimetro.dto.ErroResponseDto;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +16,8 @@ import java.util.stream.Collectors;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(RegiaoNaoEncontradaException.class)
     public ResponseEntity<ErroResponseDto> tratarRegiaoNaoEncontrada(RegiaoNaoEncontradaException excecao) {
@@ -50,6 +54,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErroResponseDto> tratarErroGenerico(Exception excecao) {
+        LOGGER.error("Erro interno não tratado", excecao);
         ErroResponseDto corpo = new ErroResponseDto("Erro interno no servidor", LocalDateTime.now());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(corpo);
     }
