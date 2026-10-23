@@ -1,8 +1,8 @@
 import "leaflet/dist/leaflet.css";
 import { useEffect } from "react";
 import { MapContainer, Polyline, TileLayer, useMap } from "react-leaflet";
-
-const CENTRO_PADRAO = [-8.0631, -34.8711]; // Recife, Marco Zero
+import { CENTRO_PADRAO, TILES_POR_TEMA, ZOOM_PADRAO } from "../../config/mapaConfig";
+import ControlesMapa from "./ControlesMapa";
 
 function calcularCentro(trechos) {
   const pontos = trechos.flatMap((trecho) => trecho.geometria);
@@ -23,20 +23,28 @@ function RecentralizarMapa({ centro }) {
   return null;
 }
 
-export default function MapaLeaflet({ trechos, trechoSelecionadoId, onSelecionarTrecho, className = "" }) {
-  const centro = calcularCentro(trechos);
+export default function MapaLeaflet({
+  trechos,
+  trechoSelecionadoId,
+  onSelecionarTrecho,
+  tema,
+  focoBusca,
+  className = "",
+  children,
+}) {
+  const centroTrechos = calcularCentro(trechos);
+  const centro = focoBusca ? [focoBusca.lat, focoBusca.lng] : centroTrechos;
+  const tiles = TILES_POR_TEMA[tema];
 
   return (
     <MapContainer
       center={CENTRO_PADRAO}
-      zoom={14}
+      zoom={ZOOM_PADRAO}
+      zoomControl={false}
       className={["h-full w-full rounded-2xl", className].join(" ")}
     >
       <RecentralizarMapa centro={centro} />
-      <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
+      <TileLayer attribution={tiles.atribuicao} url={tiles.url} />
       {trechos.map((trecho) => (
         <Polyline
           key={trecho.id}
@@ -48,6 +56,8 @@ export default function MapaLeaflet({ trechos, trechoSelecionadoId, onSelecionar
           eventHandlers={{ click: () => onSelecionarTrecho(trecho) }}
         />
       ))}
+      {children}
+      <ControlesMapa centroPadrao={CENTRO_PADRAO} zoomPadrao={ZOOM_PADRAO} />
     </MapContainer>
   );
 }
