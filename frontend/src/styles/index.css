@@ -90,7 +90,7 @@ body {
  * :root/html) — hoje usado só pela tela do Mapa. Fora de um elemento com
  * data-theme="light", todos os tokens continuam no valor escuro padrão.
  */
-[data-theme="light"] {
+[data-theme="claro"] {
   --color-base-1: var(--raw-neutro-0);
   --color-base-2: var(--raw-neutro-100);
   --color-base-3: var(--raw-neutro-0);
