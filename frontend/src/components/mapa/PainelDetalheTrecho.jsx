@@ -10,7 +10,7 @@ export default function PainelDetalheTrecho({ trecho, aoFechar }) {
     <Card className="absolute top-4 right-4 z-[1000] w-[calc(100%-2rem)] max-w-sm">
       <div className="flex items-start justify-between gap-4">
         <div className="flex flex-col gap-2">
-          <h2 className="text-lg font-semibold text-white">{trecho.nome}</h2>
+          <h2 className="text-lg font-semibold text-texto">{trecho.nome}</h2>
           <Badge tom="neutro">{trecho.status}</Badge>
         </div>
         <Button variante="fantasma" onClick={aoFechar} aria-label="Fechar painel de detalhes do trecho">

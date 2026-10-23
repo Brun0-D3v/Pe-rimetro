@@ -1,7 +1,7 @@
 const variantes = {
-  primario: "bg-primary text-white hover:bg-primary-hover",
-  secundario: "border border-base-4 text-white hover:bg-white/5",
-  fantasma: "text-texto-mute hover:bg-white/5 hover:text-white",
+  primario: "bg-primary text-texto hover:bg-primary-hover",
+  secundario: "border border-base-4 text-texto hover:bg-white/5",
+  fantasma: "text-texto-mute hover:bg-white/5 hover:text-texto",
 };
 
 export default function Button({ variante = "primario", className = "", ...props }) {
