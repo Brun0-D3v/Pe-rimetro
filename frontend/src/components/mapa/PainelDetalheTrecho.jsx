@@ -7,7 +7,7 @@ export default function PainelDetalheTrecho({ trecho, aoFechar }) {
   if (!trecho) return null;
 
   return (
-    <Card className="absolute top-4 right-4 z-[1000] w-[calc(100%-2rem)] max-w-sm">
+    <Card className="absolute top-20 right-4 z-[1000] w-[calc(100%-2rem)] max-w-sm">
       <div className="flex items-start justify-between gap-4">
         <div className="flex flex-col gap-2">
           <h2 className="text-lg font-semibold text-texto">{trecho.nome}</h2>

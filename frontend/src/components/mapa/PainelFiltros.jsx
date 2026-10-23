@@ -23,7 +23,7 @@ export default function PainelFiltros({
         onClick={aoAlternarRecolhido}
         aria-label={recolhido ? "Expandir painel de filtros" : "Recolher painel de filtros"}
         title={recolhido ? "Expandir painel de filtros" : "Recolher painel de filtros"}
-        className="flex h-8 w-8 items-center justify-center self-end rounded-lg text-texto-mute hover:bg-white/5 hover:text-texto"
+        className="flex h-8 w-8 items-center justify-center self-end rounded-lg text-texto-mute hover:bg-hover-surface hover:text-texto"
       >
         {recolhido ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
       </button>

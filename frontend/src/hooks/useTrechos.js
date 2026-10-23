@@ -8,6 +8,7 @@ export function useTrechos(regiaoId) {
 
   useEffect(() => {
     setCarregando(true);
+    setErro(null);
     buscarTrechos(regiaoId)
       .then(setTrechos)
       .catch(setErro)

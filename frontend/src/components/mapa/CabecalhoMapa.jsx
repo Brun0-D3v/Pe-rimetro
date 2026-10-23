@@ -22,7 +22,7 @@ export default function CabecalhoMapa({ busca, aoMudarBusca, sugestoes, aoSeleci
                 <button
                   type="button"
                   onClick={() => aoSelecionarSugestao(trecho)}
-                  className="w-full px-3 py-2 text-left text-sm text-texto hover:bg-white/5"
+                  className="w-full px-3 py-2 text-left text-sm text-texto hover:bg-hover-surface"
                 >
                   {trecho.nome}
                 </button>

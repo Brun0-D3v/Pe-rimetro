@@ -13,7 +13,7 @@ export default function ThemeToggle({ className = "" }) {
       aria-label={ehEscuro ? "Ativar tema claro" : "Ativar tema escuro"}
       title={ehEscuro ? "Ativar tema claro" : "Ativar tema escuro"}
       className={[
-        "inline-flex items-center justify-center rounded-full border border-base-4 p-2 text-texto-mute transition-colors duration-fast ease-reveal hover:bg-white/5 hover:text-texto",
+        "inline-flex items-center justify-center rounded-full border border-base-4 p-2 text-texto-mute transition-colors duration-fast ease-reveal hover:bg-hover-surface hover:text-texto",
         className,
       ].join(" ")}
     >

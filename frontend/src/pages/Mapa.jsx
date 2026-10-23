@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Card from "../components/ui/Card";
 import MapaLeaflet from "../components/mapa/MapaLeaflet";
 import PainelDetalheTrecho from "../components/mapa/PainelDetalheTrecho";
@@ -40,7 +40,12 @@ function MapaConteudo() {
     setBusca("");
   }
 
-  if (carregando) {
+  useEffect(() => {
+    setFocoBusca(null);
+    setTrechoSelecionado(null);
+  }, [regiaoSelecionadaId, mostrarInativos]);
+
+  if (carregando && trechos.length === 0) {
     return (
       <Card>
         <h1 className="text-xl font-semibold">Mapa</h1>
