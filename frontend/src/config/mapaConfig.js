@@ -1,16 +1,21 @@
 export const TEMA_ESCURO = "escuro";
 export const TEMA_CLARO = "claro";
 
+// Em localhost o Stadia dispensa chave; em produção defina VITE_STADIA_API_KEY.
+const chaveStadia = import.meta.env.VITE_STADIA_API_KEY;
+const sufixoChave = chaveStadia ? `?api_key=${chaveStadia}` : "";
+
+const ATRIBUICAO_STADIA =
+  '&copy; <a href="https://stadiamaps.com/" target="_blank" rel="noreferrer">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank" rel="noreferrer">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+
 export const TILES_POR_TEMA = {
   [TEMA_ESCURO]: {
-    url: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
-    atribuicao:
-      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+    url: `https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png${sufixoChave}`,
+    atribuicao: ATRIBUICAO_STADIA,
   },
   [TEMA_CLARO]: {
-    url: "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
-    atribuicao:
-      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+    url: `https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png${sufixoChave}`,
+    atribuicao: ATRIBUICAO_STADIA,
   },
 };
 
