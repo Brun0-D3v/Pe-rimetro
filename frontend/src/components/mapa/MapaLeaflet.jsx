@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { MapContainer, Polyline, TileLayer, useMap } from "react-leaflet";
 import { CENTRO_PADRAO, TILES_POR_TEMA, ZOOM_PADRAO } from "../../config/mapaConfig";
 import ControlesMapa from "./ControlesMapa";
+import MarcadorUsuario from "./MarcadorUsuario";
 
 function calcularCentro(trechos) {
   const pontos = trechos.flatMap((trecho) => trecho.geometria);
@@ -23,12 +24,31 @@ function RecentralizarMapa({ centro }) {
   return null;
 }
 
+const ZOOM_LOCALIZACAO = 17;
+
+// Centraliza no usuário apenas quando `pedido` muda (clique no botão ou primeiro fix).
+function CentralizarNaPosicao({ posicao, pedido }) {
+  const mapa = useMap();
+  useEffect(() => {
+    if (pedido > 0 && posicao) {
+      mapa.flyTo([posicao.lat, posicao.lng], ZOOM_LOCALIZACAO);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pedido]);
+  return null;
+}
+
 export default function MapaLeaflet({
   trechos,
   trechoSelecionadoId,
   onSelecionarTrecho,
   tema,
   focoBusca,
+  posicaoUsuario,
+  precisaoUsuario,
+  pedidoCentralizar = 0,
+  estadoLocalizacao,
+  aoLocalizar,
   className = "",
   children,
 }) {
@@ -44,6 +64,7 @@ export default function MapaLeaflet({
       className={["h-full w-full rounded-2xl", className].join(" ")}
     >
       <RecentralizarMapa centro={centro} />
+      <CentralizarNaPosicao posicao={posicaoUsuario} pedido={pedidoCentralizar} />
       <TileLayer attribution={tiles.atribuicao} url={tiles.url} />
       {trechos.map((trecho) => (
         <Polyline
@@ -56,8 +77,14 @@ export default function MapaLeaflet({
           eventHandlers={{ click: () => onSelecionarTrecho(trecho) }}
         />
       ))}
+      <MarcadorUsuario posicao={posicaoUsuario} precisao={precisaoUsuario} />
       {children}
-      <ControlesMapa centroPadrao={CENTRO_PADRAO} zoomPadrao={ZOOM_PADRAO} />
+      <ControlesMapa
+        centroPadrao={CENTRO_PADRAO}
+        zoomPadrao={ZOOM_PADRAO}
+        aoLocalizar={aoLocalizar}
+        estadoLocalizacao={estadoLocalizacao}
+      />
     </MapContainer>
   );
 }

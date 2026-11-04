@@ -1,14 +1,20 @@
-import { LocateFixed, Minus, Plus } from "lucide-react";
+import { Crosshair, House, Minus, Plus } from "lucide-react";
 import { DomEvent } from "leaflet";
 import { useEffect, useRef } from "react";
 import { useMap } from "react-leaflet";
 
-export default function ControlesMapa({ centroPadrao, zoomPadrao }) {
+export default function ControlesMapa({ centroPadrao, zoomPadrao, aoLocalizar, estadoLocalizacao }) {
   const mapa = useMap();
   const elementoRef = useRef(null);
 
   const classeBotao =
     "flex h-9 w-9 items-center justify-center rounded-xl border border-base-4 bg-base-3 text-texto shadow-sm transition-colors duration-fast ease-reveal hover:bg-hover-surface";
+
+  const classeLocalizacao = [
+    classeBotao,
+    estadoLocalizacao === "ativo" ? "text-accent-tech" : "",
+    estadoLocalizacao === "buscando" ? "animate-pulse" : "",
+  ].join(" ");
 
   useEffect(() => {
     if (!elementoRef.current) return;
@@ -18,6 +24,15 @@ export default function ControlesMapa({ centroPadrao, zoomPadrao }) {
 
   return (
     <div ref={elementoRef} className="absolute bottom-6 right-4 z-[1000] flex flex-col gap-2">
+      <button
+        type="button"
+        onClick={aoLocalizar}
+        aria-label="Minha localização"
+        title="Minha localização"
+        className={classeLocalizacao}
+      >
+        <Crosshair size={16} />
+      </button>
       <button type="button" onClick={() => mapa.zoomIn()} aria-label="Aumentar zoom" title="Aumentar zoom" className={classeBotao}>
         <Plus size={16} />
       </button>
@@ -31,7 +46,7 @@ export default function ControlesMapa({ centroPadrao, zoomPadrao }) {
         title="Voltar à visualização inicial"
         className={classeBotao}
       >
-        <LocateFixed size={16} />
+        <House size={16} />
       </button>
     </div>
   );

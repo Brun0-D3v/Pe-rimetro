@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Card from "../components/ui/Card";
 import MapaLeaflet from "../components/mapa/MapaLeaflet";
 import PainelDetalheTrecho from "../components/mapa/PainelDetalheTrecho";
@@ -6,7 +6,9 @@ import CabecalhoMapa from "../components/mapa/CabecalhoMapa";
 import PainelFiltros from "../components/mapa/PainelFiltros";
 import LegendaMapa from "../components/mapa/LegendaMapa";
 import CamadaCaminhabilidadeDemo from "../components/mapa/CamadaCaminhabilidadeDemo";
+import AvisoLocalizacao from "../components/mapa/AvisoLocalizacao";
 import { ThemeProvider, useTheme } from "../context/ThemeContext";
+import { useLocalizacao } from "../hooks/useLocalizacao";
 import { useTrechos } from "../hooks/useTrechos";
 import { useRegioes } from "../hooks/useRegioes";
 
@@ -22,6 +24,27 @@ function MapaConteudo() {
 
   const { trechos, carregando, erro } = useTrechos(regiaoSelecionadaId || undefined);
   const { regioes } = useRegioes();
+
+  const { posicao: posicaoUsuario, precisao, estado: estadoLocalizacao, erro: erroLocalizacao, ativar } =
+    useLocalizacao();
+  const [pedidoCentralizar, setPedidoCentralizar] = useState(0);
+  const aguardandoPrimeiroFix = useRef(false);
+
+  function aoLocalizar() {
+    if (estadoLocalizacao === "ativo" && posicaoUsuario) {
+      setPedidoCentralizar((atual) => atual + 1);
+      return;
+    }
+    aguardandoPrimeiroFix.current = true;
+    ativar();
+  }
+
+  useEffect(() => {
+    if (estadoLocalizacao === "ativo" && posicaoUsuario && aguardandoPrimeiroFix.current) {
+      aguardandoPrimeiroFix.current = false;
+      setPedidoCentralizar((atual) => atual + 1);
+    }
+  }, [estadoLocalizacao, posicaoUsuario]);
 
   const trechosVisiveis = useMemo(
     () => (mostrarInativos ? trechos : trechos.filter((trecho) => trecho.status === "ATIVO")),
@@ -73,6 +96,11 @@ function MapaConteudo() {
         onSelecionarTrecho={setTrechoSelecionado}
         tema={tema}
         focoBusca={focoBusca}
+        posicaoUsuario={posicaoUsuario}
+        precisaoUsuario={precisao}
+        pedidoCentralizar={pedidoCentralizar}
+        estadoLocalizacao={estadoLocalizacao}
+        aoLocalizar={aoLocalizar}
       >
         {camadaDemoVisivel && <CamadaCaminhabilidadeDemo />}
       </MapaLeaflet>
@@ -98,6 +126,12 @@ function MapaConteudo() {
       />
 
       <LegendaMapa className="absolute bottom-6 left-4 z-[1000]" />
+
+      <AvisoLocalizacao
+        estado={estadoLocalizacao}
+        erro={erroLocalizacao}
+        className="absolute bottom-24 left-1/2 z-[1000] -translate-x-1/2"
+      />
 
       <PainelDetalheTrecho trecho={trechoSelecionado} aoFechar={() => setTrechoSelecionado(null)} />
     </div>
