@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { distanciaMetros } from "../utils/geometria";
 
 const OPCOES_WATCH = { enableHighAccuracy: true, maximumAge: 5000, timeout: 15000 };
 const LIMIAR_MOVIMENTO_METROS = 5;
-const RAIO_TERRA_METROS = 6371000;
 
 const MENSAGENS = {
   negado:
@@ -13,17 +13,6 @@ const MENSAGENS = {
 
 function geolocalizacaoSuportada() {
   return typeof navigator !== "undefined" && Boolean(navigator.geolocation);
-}
-
-// Distância aproximada (haversine) entre dois pontos { lat, lng }, em metros.
-function distanciaMetros(a, b) {
-  const paraRadianos = (graus) => (graus * Math.PI) / 180;
-  const dLat = paraRadianos(b.lat - a.lat);
-  const dLng = paraRadianos(b.lng - a.lng);
-  const h =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(paraRadianos(a.lat)) * Math.cos(paraRadianos(b.lat)) * Math.sin(dLng / 2) ** 2;
-  return 2 * RAIO_TERRA_METROS * Math.asin(Math.sqrt(h));
 }
 
 export function useLocalizacao() {

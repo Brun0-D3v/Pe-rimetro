@@ -6,3 +6,8 @@ export async function buscarTrechos(regiaoId) {
   });
   return resposta.data;
 }
+
+export async function criarTrecho(dados) {
+  const resposta = await api.post("/trechos", dados);
+  return resposta.data;
+}

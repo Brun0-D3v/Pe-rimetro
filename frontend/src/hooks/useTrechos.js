@@ -20,5 +20,10 @@ export function useTrechos(regiaoId) {
     setTrechos((lista) => lista.map((trecho) => (trecho.id === trechoAtualizado.id ? trechoAtualizado : trecho)));
   }, []);
 
-  return { trechos, carregando, erro, atualizarTrecho };
+  // Inclui na lista um trecho recém-criado (devolvido pelo backend), sem recarregar a página.
+  const adicionarTrecho = useCallback((novoTrecho) => {
+    setTrechos((lista) => [...lista, novoTrecho]);
+  }, []);
+
+  return { trechos, carregando, erro, atualizarTrecho, adicionarTrecho };
 }
