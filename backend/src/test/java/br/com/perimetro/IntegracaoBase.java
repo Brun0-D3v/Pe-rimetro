@@ -1,5 +1,6 @@
 package br.com.perimetro;
 
+import br.com.perimetro.repository.AvaliacaoRepository;
 import br.com.perimetro.repository.RegiaoRepository;
 import br.com.perimetro.repository.TrechoRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,8 +28,12 @@ public abstract class IntegracaoBase {
     @Autowired
     protected TrechoRepository trechoRepository;
 
+    @Autowired
+    protected AvaliacaoRepository avaliacaoRepository;
+
     @BeforeEach
     void limparBanco() {
+        avaliacaoRepository.deleteAll();
         trechoRepository.deleteAll();
         regiaoRepository.deleteAll();
     }
