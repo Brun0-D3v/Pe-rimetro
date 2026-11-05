@@ -5,6 +5,7 @@ import br.com.perimetro.dto.TrechoResponseDto;
 import br.com.perimetro.service.TrechoService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -41,8 +42,8 @@ public class TrechoController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public TrechoResponseDto criar(@Valid @RequestBody TrechoRequestDto dto) {
-        return trechoService.criar(dto);
+    public TrechoResponseDto criar(@Valid @RequestBody TrechoRequestDto dto, Authentication autenticacao) {
+        return trechoService.criar(dto, UUID.fromString(autenticacao.getName()));
     }
 
     @PutMapping("/{id}")

@@ -47,7 +47,7 @@ class AvaliacaoServiceTest {
         when(trechoRepository.buscarParaAtualizacao(trechoId)).thenReturn(Optional.empty());
         AvaliacaoService service = new AvaliacaoService(avaliacaoRepository, trechoRepository);
 
-        assertThatThrownBy(() -> service.criar(trechoId, notas(5)))
+        assertThatThrownBy(() -> service.criar(trechoId, notas(5), UUID.randomUUID()))
                 .isInstanceOf(TrechoNaoEncontradoException.class);
     }
 
@@ -59,7 +59,7 @@ class AvaliacaoServiceTest {
         when(trechoRepository.buscarParaAtualizacao(trechoId)).thenReturn(Optional.of(trecho(AtivoInativo.INATIVO)));
         AvaliacaoService service = new AvaliacaoService(avaliacaoRepository, trechoRepository);
 
-        assertThatThrownBy(() -> service.criar(trechoId, notas(5)))
+        assertThatThrownBy(() -> service.criar(trechoId, notas(5), UUID.randomUUID()))
                 .isInstanceOf(TrechoInativoException.class);
         verify(avaliacaoRepository, never()).save(any());
     }
@@ -83,7 +83,7 @@ class AvaliacaoServiceTest {
         when(avaliacaoRepository.countByTrechoId(trechoId)).thenReturn(3L);
         AvaliacaoService service = new AvaliacaoService(avaliacaoRepository, trechoRepository);
 
-        AvaliacaoResponseDto resposta = service.criar(trechoId, notas(5));
+        AvaliacaoResponseDto resposta = service.criar(trechoId, notas(5), UUID.randomUUID());
 
         assertThat(resposta.getTrecho().getIndiceAtual()).isEqualByComparingTo("5.40");
         assertThat(resposta.getTrecho().getTotalAvaliacoes()).isEqualTo(3);

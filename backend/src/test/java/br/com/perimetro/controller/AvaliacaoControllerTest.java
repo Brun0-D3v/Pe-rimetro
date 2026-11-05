@@ -64,7 +64,7 @@ class AvaliacaoControllerTest {
         TrechoResponseDto trechoDto = new TrechoResponseDto(trechoId, "Rua da Aurora",
                 List.of(new PontoDto(-8.06, -34.87)), -8.06, -34.87, new BigDecimal("5.00"),
                 AtivoInativo.ATIVO, UUID.randomUUID(), 1, Classificacao.MEDIO);
-        when(avaliacaoService.criar(eq(trechoId), any(AvaliacaoRequestDto.class)))
+        when(avaliacaoService.criar(eq(trechoId), any(AvaliacaoRequestDto.class), any(UUID.class)))
                 .thenReturn(new AvaliacaoResponseDto(avaliacao, trechoDto));
 
         mockMvc.perform(post(URL, trechoId).with(cidadao()).contentType(MediaType.APPLICATION_JSON).content(json(5)))
@@ -105,7 +105,7 @@ class AvaliacaoControllerTest {
     @Test
     void retorna404QuandoOTrechoNaoExiste() throws Exception {
         UUID trechoId = UUID.randomUUID();
-        when(avaliacaoService.criar(eq(trechoId), any(AvaliacaoRequestDto.class)))
+        when(avaliacaoService.criar(eq(trechoId), any(AvaliacaoRequestDto.class), any(UUID.class)))
                 .thenThrow(new TrechoNaoEncontradoException("Trecho não encontrado: " + trechoId));
 
         mockMvc.perform(post(URL, trechoId).with(cidadao()).contentType(MediaType.APPLICATION_JSON).content(json(5)))
@@ -115,7 +115,7 @@ class AvaliacaoControllerTest {
     @Test
     void retorna409QuandoOTrechoEstaInativo() throws Exception {
         UUID trechoId = UUID.randomUUID();
-        when(avaliacaoService.criar(eq(trechoId), any(AvaliacaoRequestDto.class)))
+        when(avaliacaoService.criar(eq(trechoId), any(AvaliacaoRequestDto.class), any(UUID.class)))
                 .thenThrow(new TrechoInativoException("Trecho inativo não pode ser avaliado: " + trechoId));
 
         mockMvc.perform(post(URL, trechoId).with(cidadao()).contentType(MediaType.APPLICATION_JSON).content(json(5)))

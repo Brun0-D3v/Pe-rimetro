@@ -73,7 +73,7 @@ class TrechoControllerTest {
     void criaTrechoComDadosValidos() throws Exception {
         UUID id = UUID.randomUUID();
         UUID regiaoId = UUID.randomUUID();
-        when(trechoService.criar(any())).thenReturn(
+        when(trechoService.criar(any(), any(UUID.class))).thenReturn(
                 new TrechoResponseDto(id, "Rua das Flores", GEOMETRIA_EXEMPLO, -23.55, -46.63, null, AtivoInativo.ATIVO, regiaoId, 0, null));
         TrechoRequestDto corpo = new TrechoRequestDto("Rua das Flores", GEOMETRIA_EXEMPLO, -23.55, -46.63, regiaoId, null);
 
@@ -112,7 +112,7 @@ class TrechoControllerTest {
     @Test
     void retorna404QuandoRegiaoDoTrechoNaoExiste() throws Exception {
         UUID regiaoId = UUID.randomUUID();
-        when(trechoService.criar(any())).thenThrow(new RegiaoNaoEncontradaException("Região não encontrada: " + regiaoId));
+        when(trechoService.criar(any(), any(UUID.class))).thenThrow(new RegiaoNaoEncontradaException("Região não encontrada: " + regiaoId));
         TrechoRequestDto corpo = new TrechoRequestDto("Rua das Flores", GEOMETRIA_EXEMPLO, -23.55, -46.63, regiaoId, null);
 
         mockMvc.perform(post("/api/v1/trechos").with(admin())
