@@ -48,7 +48,7 @@ class TrechoControllerTest {
         UUID id = UUID.randomUUID();
         UUID regiaoId = UUID.randomUUID();
         when(trechoService.listar(null)).thenReturn(List.of(
-                new TrechoResponseDto(id, "Rua das Flores", GEOMETRIA_EXEMPLO, -23.55, -46.63, null, AtivoInativo.ATIVO, regiaoId)));
+                new TrechoResponseDto(id, "Rua das Flores", GEOMETRIA_EXEMPLO, -23.55, -46.63, null, AtivoInativo.ATIVO, regiaoId, 0, null)));
 
         mockMvc.perform(get("/api/v1/trechos"))
                 .andExpect(status().isOk())
@@ -70,7 +70,7 @@ class TrechoControllerTest {
         UUID id = UUID.randomUUID();
         UUID regiaoId = UUID.randomUUID();
         when(trechoService.criar(any())).thenReturn(
-                new TrechoResponseDto(id, "Rua das Flores", GEOMETRIA_EXEMPLO, -23.55, -46.63, null, AtivoInativo.ATIVO, regiaoId));
+                new TrechoResponseDto(id, "Rua das Flores", GEOMETRIA_EXEMPLO, -23.55, -46.63, null, AtivoInativo.ATIVO, regiaoId, 0, null));
         TrechoRequestDto corpo = new TrechoRequestDto("Rua das Flores", GEOMETRIA_EXEMPLO, -23.55, -46.63, regiaoId, null);
 
         mockMvc.perform(post("/api/v1/trechos")

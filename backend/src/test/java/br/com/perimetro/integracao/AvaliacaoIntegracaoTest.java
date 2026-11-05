@@ -1,0 +1,114 @@
+package br.com.perimetro.integracao;
+
+import br.com.perimetro.IntegracaoBase;
+import br.com.perimetro.dto.PontoDto;
+import br.com.perimetro.entity.AtivoInativo;
+import br.com.perimetro.entity.Regiao;
+import br.com.perimetro.entity.Trecho;
+import org.junit.jupiter.api.Test;
+import org.springframework.http.MediaType;
+
+import java.util.List;
+import java.util.UUID;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+class AvaliacaoIntegracaoTest extends IntegracaoBase {
+
+    private static final String URL = "/api/v1/trechos/{id}/avaliacoes";
+
+    private Trecho novoTrecho(AtivoInativo status) {
+        Regiao regiao = regiaoRepository.save(new Regiao("Recife Antigo"));
+        return trechoRepository.save(new Trecho(
+                "Rua da Aurora", List.of(new PontoDto(-8.06, -34.87)), -8.06, -34.87, status, regiao));
+    }
+
+    private static String corpo(int calcada, int acessibilidade, int iluminacao,
+                                int arborizacao, int travessias, int mobiliario) {
+        return "{\"notaCalcada\":" + calcada + ",\"notaAcessibilidade\":" + acessibilidade
+                + ",\"notaIluminacao\":" + iluminacao + ",\"notaArborizacao\":" + arborizacao
+                + ",\"notaTravessias\":" + travessias + ",\"notaMobiliario\":" + mobiliario + "}";
+    }
+
+    @Test
+    void primeiraAvaliacaoDefineOIndiceDoTrecho() throws Exception {
+        Trecho trecho = novoTrecho(AtivoInativo.ATIVO);
+
+        mockMvc.perform(post(URL, trecho.getId()).contentType(MediaType.APPLICATION_JSON)
+                        .content(corpo(8, 6, 4, 2, 0, 10)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.trecho.indiceAtual").value(5.4))
+                .andExpect(jsonPath("$.trecho.totalAvaliacoes").value(1))
+                .andExpect(jsonPath("$.trecho.classificacao").value("MEDIO"));
+
+        mockMvc.perform(get("/api/v1/trechos/{id}", trecho.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.indiceAtual").value(5.4))
+                .andExpect(jsonPath("$.totalAvaliacoes").value(1));
+    }
+
+    @Test
+    void segundaAvaliacaoMudaOIndiceParaAMedia() throws Exception {
+        Trecho trecho = novoTrecho(AtivoInativo.ATIVO);
+        mockMvc.perform(post(URL, trecho.getId()).contentType(MediaType.APPLICATION_JSON)
+                .content(corpo(10, 10, 10, 10, 10, 10))).andExpect(status().isCreated());
+
+        mockMvc.perform(post(URL, trecho.getId()).contentType(MediaType.APPLICATION_JSON)
+                        .content(corpo(2, 2, 2, 2, 2, 2)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.trecho.indiceAtual").value(6.0))
+                .andExpect(jsonPath("$.trecho.totalAvaliacoes").value(2))
+                .andExpect(jsonPath("$.trecho.classificacao").value("MEDIO"));
+    }
+
+    @Test
+    void trechoBemAvaliadoViraBom() throws Exception {
+        Trecho trecho = novoTrecho(AtivoInativo.ATIVO);
+
+        mockMvc.perform(post(URL, trecho.getId()).contentType(MediaType.APPLICATION_JSON)
+                        .content(corpo(9, 9, 9, 9, 9, 9)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.trecho.classificacao").value("BOM"));
+    }
+
+    @Test
+    void trechoSemAvaliacaoNaoTemClassificacao() throws Exception {
+        Trecho trecho = novoTrecho(AtivoInativo.ATIVO);
+
+        mockMvc.perform(get("/api/v1/trechos/{id}", trecho.getId()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.indiceAtual").isEmpty())
+                .andExpect(jsonPath("$.totalAvaliacoes").value(0))
+                .andExpect(jsonPath("$.classificacao").isEmpty());
+    }
+
+    @Test
+    void trechoInativoRetorna409ENaoGrava() throws Exception {
+        Trecho trecho = novoTrecho(AtivoInativo.INATIVO);
+
+        mockMvc.perform(post(URL, trecho.getId()).contentType(MediaType.APPLICATION_JSON)
+                        .content(corpo(5, 5, 5, 5, 5, 5)))
+                .andExpect(status().isConflict());
+
+        org.assertj.core.api.Assertions.assertThat(avaliacaoRepository.count()).isZero();
+    }
+
+    @Test
+    void trechoInexistenteRetorna404() throws Exception {
+        mockMvc.perform(post(URL, UUID.randomUUID()).contentType(MediaType.APPLICATION_JSON)
+                        .content(corpo(5, 5, 5, 5, 5, 5)))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void notaForaDaFaixaRetorna400() throws Exception {
+        Trecho trecho = novoTrecho(AtivoInativo.ATIVO);
+
+        mockMvc.perform(post(URL, trecho.getId()).contentType(MediaType.APPLICATION_JSON)
+                        .content(corpo(11, 5, 5, 5, 5, 5)))
+                .andExpect(status().isBadRequest());
+    }
+}
