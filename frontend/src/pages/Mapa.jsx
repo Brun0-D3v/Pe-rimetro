@@ -5,7 +5,6 @@ import PainelDetalheTrecho from "../components/mapa/PainelDetalheTrecho";
 import CabecalhoMapa from "../components/mapa/CabecalhoMapa";
 import PainelFiltros from "../components/mapa/PainelFiltros";
 import LegendaMapa from "../components/mapa/LegendaMapa";
-import CamadaCaminhabilidadeDemo from "../components/mapa/CamadaCaminhabilidadeDemo";
 import AvisoLocalizacao from "../components/mapa/AvisoLocalizacao";
 import { ThemeProvider, useTheme } from "../context/ThemeContext";
 import { useLocalizacao } from "../hooks/useLocalizacao";
@@ -18,11 +17,10 @@ function MapaConteudo() {
   const [trechoSelecionado, setTrechoSelecionado] = useState(null);
   const [recolhido, setRecolhido] = useState(false);
   const [mostrarInativos, setMostrarInativos] = useState(true);
-  const [camadaDemoVisivel, setCamadaDemoVisivel] = useState(false);
   const [busca, setBusca] = useState("");
   const [focoBusca, setFocoBusca] = useState(null);
 
-  const { trechos, carregando, erro } = useTrechos(regiaoSelecionadaId || undefined);
+  const { trechos, carregando, erro, atualizarTrecho } = useTrechos(regiaoSelecionadaId || undefined);
   const { regioes } = useRegioes();
 
   const { posicao: posicaoUsuario, precisao, estado: estadoLocalizacao, erro: erroLocalizacao, ativar } =
@@ -63,6 +61,11 @@ function MapaConteudo() {
     setBusca("");
   }
 
+  function aoAvaliarTrecho(trechoAtualizado) {
+    atualizarTrecho(trechoAtualizado);
+    setTrechoSelecionado(trechoAtualizado);
+  }
+
   useEffect(() => {
     setFocoBusca(null);
     setTrechoSelecionado(null);
@@ -101,9 +104,7 @@ function MapaConteudo() {
         pedidoCentralizar={pedidoCentralizar}
         estadoLocalizacao={estadoLocalizacao}
         aoLocalizar={aoLocalizar}
-      >
-        {camadaDemoVisivel && <CamadaCaminhabilidadeDemo />}
-      </MapaLeaflet>
+      />
 
       {trechosVisiveis.length === 0 && (
         <p className="absolute left-1/2 top-20 z-[1000] -translate-x-1/2 rounded-full bg-base-3 px-4 py-2 text-sm text-texto-mute shadow-sm">
@@ -121,8 +122,6 @@ function MapaConteudo() {
         aoSelecionarRegiao={setRegiaoSelecionadaId}
         mostrarInativos={mostrarInativos}
         aoAlternarMostrarInativos={() => setMostrarInativos((atual) => !atual)}
-        camadaDemoVisivel={camadaDemoVisivel}
-        aoAlternarCamadaDemo={() => setCamadaDemoVisivel((atual) => !atual)}
       />
 
       <LegendaMapa className="absolute bottom-6 left-4 z-[1000]" />
@@ -133,7 +132,12 @@ function MapaConteudo() {
         className="absolute bottom-24 left-1/2 z-[1000] -translate-x-1/2"
       />
 
-      <PainelDetalheTrecho trecho={trechoSelecionado} aoFechar={() => setTrechoSelecionado(null)} />
+      <PainelDetalheTrecho
+        key={trechoSelecionado?.id}
+        trecho={trechoSelecionado}
+        aoFechar={() => setTrechoSelecionado(null)}
+        aoAvaliado={aoAvaliarTrecho}
+      />
     </div>
   );
 }

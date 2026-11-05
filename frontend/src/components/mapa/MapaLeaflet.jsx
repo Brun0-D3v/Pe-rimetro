@@ -1,6 +1,7 @@
 import "leaflet/dist/leaflet.css";
 import { useEffect } from "react";
 import { MapContainer, Polyline, TileLayer, useMap } from "react-leaflet";
+import { corDoTrecho } from "../../config/indiceConfig";
 import { CENTRO_PADRAO, TILES_POR_TEMA, ZOOM_PADRAO } from "../../config/mapaConfig";
 import ControlesMapa from "./ControlesMapa";
 import MarcadorUsuario from "./MarcadorUsuario";
@@ -71,8 +72,8 @@ export default function MapaLeaflet({
           key={trecho.id}
           positions={trecho.geometria.map((ponto) => [ponto.lat, ponto.lng])}
           pathOptions={{
-            color: trecho.id === trechoSelecionadoId ? "#38bdf8" : "#60a5fa",
-            weight: trecho.id === trechoSelecionadoId ? 5 : 3,
+            color: corDoTrecho(trecho.classificacao),
+            weight: trecho.id === trechoSelecionadoId ? 7 : 4,
           }}
           eventHandlers={{ click: () => onSelecionarTrecho(trecho) }}
         />

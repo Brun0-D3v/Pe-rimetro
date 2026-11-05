@@ -8,8 +8,6 @@ export default function PainelFiltros({
   aoSelecionarRegiao,
   mostrarInativos,
   aoAlternarMostrarInativos,
-  camadaDemoVisivel,
-  aoAlternarCamadaDemo,
 }) {
   return (
     <aside
@@ -52,11 +50,6 @@ export default function PainelFiltros({
           <label className="flex items-center gap-2 text-sm text-texto">
             <input type="checkbox" checked={mostrarInativos} onChange={aoAlternarMostrarInativos} />
             Mostrar trechos inativos
-          </label>
-
-          <label className="flex items-center gap-2 text-sm text-texto">
-            <input type="checkbox" checked={camadaDemoVisivel} onChange={aoAlternarCamadaDemo} />
-            Camada de caminhabilidade (demonstração)
           </label>
         </div>
       )}
