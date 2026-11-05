@@ -1,9 +1,12 @@
 package br.com.perimetro;
 
+import br.com.perimetro.entity.Perfil;
+import br.com.perimetro.entity.Usuario;
 import br.com.perimetro.repository.AvaliacaoRepository;
 import br.com.perimetro.repository.RegiaoRepository;
 import br.com.perimetro.repository.TrechoRepository;
 import br.com.perimetro.repository.UsuarioRepository;
+import br.com.perimetro.service.TokenService;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -11,6 +14,8 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
+
+import java.util.UUID;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -34,6 +39,16 @@ public abstract class IntegracaoBase {
 
     @Autowired
     protected UsuarioRepository usuarioRepository;
+
+    @Autowired
+    private TokenService tokenService;
+
+    /** Cria um usuário com o perfil e devolve o valor do cabeçalho Authorization ("Bearer ..."). */
+    protected String autorizacao(Perfil perfil) {
+        Usuario usuario = usuarioRepository.save(new Usuario(
+                "Usuário " + perfil, perfil.name().toLowerCase() + "-" + UUID.randomUUID() + "@teste.com", "hash-qualquer", perfil));
+        return "Bearer " + tokenService.gerar(usuario).getToken();
+    }
 
     @BeforeEach
     void limparBanco() {

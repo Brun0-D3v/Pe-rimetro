@@ -41,6 +41,18 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(corpo);
     }
 
+    @ExceptionHandler(EmailJaCadastradoException.class)
+    public ResponseEntity<ErroResponseDto> tratarEmailJaCadastrado(EmailJaCadastradoException excecao) {
+        ErroResponseDto corpo = new ErroResponseDto(excecao.getMessage(), LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(corpo);
+    }
+
+    @ExceptionHandler(CredenciaisInvalidasException.class)
+    public ResponseEntity<ErroResponseDto> tratarCredenciaisInvalidas(CredenciaisInvalidasException excecao) {
+        ErroResponseDto corpo = new ErroResponseDto(excecao.getMessage(), LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(corpo);
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErroResponseDto> tratarValidacaoInvalida(MethodArgumentNotValidException excecao) {
         String mensagem = excecao.getBindingResult().getFieldErrors().stream()

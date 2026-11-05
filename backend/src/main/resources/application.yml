@@ -20,5 +20,8 @@ spring:
     locations: classpath:db/migration
 
 perimetro:
+  jwt:
+    segredo: ${JWT_SECRET:}
+    expiracao: PT2H
   cors:
     origens-permitidas: ${FRONTEND_URL:http://localhost:5173,http://localhost:5174}

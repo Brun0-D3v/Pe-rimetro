@@ -1,6 +1,7 @@
 package br.com.perimetro.integracao;
 
 import br.com.perimetro.IntegracaoBase;
+import br.com.perimetro.entity.Perfil;
 import br.com.perimetro.dto.PontoDto;
 import br.com.perimetro.dto.TrechoRequestDto;
 import br.com.perimetro.entity.AtivoInativo;
@@ -38,7 +39,7 @@ class AvaliacaoIntegracaoTest extends IntegracaoBase {
     void primeiraAvaliacaoDefineOIndiceDoTrecho() throws Exception {
         Trecho trecho = novoTrecho(AtivoInativo.ATIVO);
 
-        mockMvc.perform(post(URL, trecho.getId()).contentType(MediaType.APPLICATION_JSON)
+        mockMvc.perform(post(URL, trecho.getId()).header("Authorization", autorizacao(Perfil.CIDADAO)).contentType(MediaType.APPLICATION_JSON)
                         .content(corpo(8, 6, 4, 2, 0, 10)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.trecho.indiceAtual").value(5.4))
@@ -54,10 +55,10 @@ class AvaliacaoIntegracaoTest extends IntegracaoBase {
     @Test
     void segundaAvaliacaoMudaOIndiceParaAMedia() throws Exception {
         Trecho trecho = novoTrecho(AtivoInativo.ATIVO);
-        mockMvc.perform(post(URL, trecho.getId()).contentType(MediaType.APPLICATION_JSON)
+        mockMvc.perform(post(URL, trecho.getId()).header("Authorization", autorizacao(Perfil.CIDADAO)).contentType(MediaType.APPLICATION_JSON)
                 .content(corpo(10, 10, 10, 10, 10, 10))).andExpect(status().isCreated());
 
-        mockMvc.perform(post(URL, trecho.getId()).contentType(MediaType.APPLICATION_JSON)
+        mockMvc.perform(post(URL, trecho.getId()).header("Authorization", autorizacao(Perfil.CIDADAO)).contentType(MediaType.APPLICATION_JSON)
                         .content(corpo(2, 2, 2, 2, 2, 2)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.trecho.indiceAtual").value(6.0))
@@ -69,7 +70,7 @@ class AvaliacaoIntegracaoTest extends IntegracaoBase {
     void trechoBemAvaliadoViraBom() throws Exception {
         Trecho trecho = novoTrecho(AtivoInativo.ATIVO);
 
-        mockMvc.perform(post(URL, trecho.getId()).contentType(MediaType.APPLICATION_JSON)
+        mockMvc.perform(post(URL, trecho.getId()).header("Authorization", autorizacao(Perfil.CIDADAO)).contentType(MediaType.APPLICATION_JSON)
                         .content(corpo(9, 9, 9, 9, 9, 9)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.trecho.classificacao").value("BOM"));
@@ -90,7 +91,7 @@ class AvaliacaoIntegracaoTest extends IntegracaoBase {
     void trechoInativoRetorna409ENaoGrava() throws Exception {
         Trecho trecho = novoTrecho(AtivoInativo.INATIVO);
 
-        mockMvc.perform(post(URL, trecho.getId()).contentType(MediaType.APPLICATION_JSON)
+        mockMvc.perform(post(URL, trecho.getId()).header("Authorization", autorizacao(Perfil.CIDADAO)).contentType(MediaType.APPLICATION_JSON)
                         .content(corpo(5, 5, 5, 5, 5, 5)))
                 .andExpect(status().isConflict());
 
@@ -103,7 +104,7 @@ class AvaliacaoIntegracaoTest extends IntegracaoBase {
         TrechoRequestDto novo = new TrechoRequestDto("Rua do usuário",
                 List.of(new PontoDto(-8.1190, -34.9040), new PontoDto(-8.1200, -34.9050), new PontoDto(-8.1215, -34.9060)),
                 -8.12, -34.905, regiao.getId(), null);
-        String resposta = mockMvc.perform(post("/api/v1/trechos")
+        String resposta = mockMvc.perform(post("/api/v1/trechos").header("Authorization", autorizacao(Perfil.CIDADAO))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(novo)))
                 .andExpect(status().isCreated())
@@ -111,14 +112,14 @@ class AvaliacaoIntegracaoTest extends IntegracaoBase {
                 .andReturn().getResponse().getContentAsString();
         String id = objectMapper.readTree(resposta).get("id").asString();
 
-        mockMvc.perform(post(URL, id).contentType(MediaType.APPLICATION_JSON).content(corpo(9, 9, 9, 9, 9, 9)))
+        mockMvc.perform(post(URL, id).header("Authorization", autorizacao(Perfil.CIDADAO)).contentType(MediaType.APPLICATION_JSON).content(corpo(9, 9, 9, 9, 9, 9)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.trecho.classificacao").value("BOM"));
     }
 
     @Test
     void trechoInexistenteRetorna404() throws Exception {
-        mockMvc.perform(post(URL, UUID.randomUUID()).contentType(MediaType.APPLICATION_JSON)
+        mockMvc.perform(post(URL, UUID.randomUUID()).header("Authorization", autorizacao(Perfil.CIDADAO)).contentType(MediaType.APPLICATION_JSON)
                         .content(corpo(5, 5, 5, 5, 5, 5)))
                 .andExpect(status().isNotFound());
     }
@@ -127,7 +128,7 @@ class AvaliacaoIntegracaoTest extends IntegracaoBase {
     void notaForaDaFaixaRetorna400() throws Exception {
         Trecho trecho = novoTrecho(AtivoInativo.ATIVO);
 
-        mockMvc.perform(post(URL, trecho.getId()).contentType(MediaType.APPLICATION_JSON)
+        mockMvc.perform(post(URL, trecho.getId()).header("Authorization", autorizacao(Perfil.CIDADAO)).contentType(MediaType.APPLICATION_JSON)
                         .content(corpo(11, 5, 5, 5, 5, 5)))
                 .andExpect(status().isBadRequest());
     }
