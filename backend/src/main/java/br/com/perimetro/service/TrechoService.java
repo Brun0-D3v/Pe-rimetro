@@ -80,15 +80,6 @@ public class TrechoService {
     }
 
     private TrechoResponseDto paraDto(Trecho trecho) {
-        return new TrechoResponseDto(
-                trecho.getId(),
-                trecho.getNome(),
-                trecho.getGeometria(),
-                trecho.getLatitude(),
-                trecho.getLongitude(),
-                trecho.getIndiceAtual(),
-                trecho.getStatus(),
-                trecho.getRegiao().getId()
-        );
+        return TrechoResponseDto.de(trecho);
     }
 }

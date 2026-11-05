@@ -1,0 +1,1 @@
+ALTER TABLE trecho ADD COLUMN total_avaliacoes INTEGER NOT NULL DEFAULT 0;

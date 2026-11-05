@@ -35,6 +35,12 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(corpo);
     }
 
+    @ExceptionHandler(TrechoInativoException.class)
+    public ResponseEntity<ErroResponseDto> tratarTrechoInativo(TrechoInativoException excecao) {
+        ErroResponseDto corpo = new ErroResponseDto(excecao.getMessage(), LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(corpo);
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErroResponseDto> tratarValidacaoInvalida(MethodArgumentNotValidException excecao) {
         String mensagem = excecao.getBindingResult().getFieldErrors().stream()
