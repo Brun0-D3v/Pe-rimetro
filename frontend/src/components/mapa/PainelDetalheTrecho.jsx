@@ -4,6 +4,8 @@ import { formatarIndice, rotuloDaClassificacao, tomDaClassificacao } from "../..
 import Badge from "../ui/Badge";
 import Button from "../ui/Button";
 import Card from "../ui/Card";
+import { useAuth } from "../../hooks/useAuth";
+import ConviteLogin from "./ConviteLogin";
 import FormularioAvaliacao from "./FormularioAvaliacao";
 
 function textoTotal(total) {
@@ -13,6 +15,7 @@ function textoTotal(total) {
 export default function PainelDetalheTrecho({ trecho, aoFechar, aoAvaliado }) {
   // Quem usa o painel passa `key={trecho.id}`: ao trocar de trecho o componente remonta,
   // e o formulário e a mensagem de sucesso não sobrevivem.
+  const { autenticado } = useAuth();
   const [avaliando, setAvaliando] = useState(false);
   const [confirmacao, setConfirmacao] = useState(false);
 
@@ -58,7 +61,15 @@ export default function PainelDetalheTrecho({ trecho, aoFechar, aoAvaliado }) {
         </p>
       )}
 
-      {avaliando ? (
+      {!autenticado ? (
+        <div className="mt-4">
+          {inativo ? (
+            <p className="text-xs text-texto-mute">Trechos inativos não recebem avaliações.</p>
+          ) : (
+            <ConviteLogin mensagem="Entre para avaliar este trecho." />
+          )}
+        </div>
+      ) : avaliando ? (
         <FormularioAvaliacao
           trechoId={trecho.id}
           aoConcluir={concluirAvaliacao}
