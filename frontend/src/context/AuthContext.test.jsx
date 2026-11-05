@@ -3,7 +3,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { CHAVE_SESSAO, EVENTO_SESSAO_EXPIRADA } from "../config/authConfig";
 import { login, registrar } from "../services/authService";
 import { salvarSessao } from "../services/sessaoStorage";
-import { AuthProvider, useAuth } from "./AuthContext";
+import { useAuth } from "../hooks/useAuth";
+import { AuthProvider } from "./AuthContext";
 
 vi.mock("../services/authService", () => ({
   login: vi.fn(),

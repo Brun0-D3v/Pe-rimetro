@@ -1,9 +1,8 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { EVENTO_SESSAO_EXPIRADA } from "../config/authConfig";
 import { login as loginNaApi, registrar as registrarNaApi } from "../services/authService";
 import { lerSessao, limparSessao, salvarSessao } from "../services/sessaoStorage";
-
-const AuthContext = createContext(null);
+import { AuthContext } from "./authContexto";
 
 // setTimeout aceita no máximo ~24,8 dias; uma sessão de 2 h nunca chega perto, mas protege o limite.
 const ATRASO_MAXIMO_MS = 2 ** 31 - 1;
@@ -68,12 +67,4 @@ export function AuthProvider({ children }) {
   );
 
   return <AuthContext.Provider value={valor}>{children}</AuthContext.Provider>;
-}
-
-export function useAuth() {
-  const contexto = useContext(AuthContext);
-  if (!contexto) {
-    throw new Error("useAuth precisa ser usado dentro de um AuthProvider");
-  }
-  return contexto;
 }
