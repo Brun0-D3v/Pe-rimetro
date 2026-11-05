@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { buscarTrechos } from "../services/trechoService";
 
 export function useTrechos(regiaoId) {
@@ -15,5 +15,10 @@ export function useTrechos(regiaoId) {
       .finally(() => setCarregando(false));
   }, [regiaoId]);
 
-  return { trechos, carregando, erro };
+  // Troca um trecho da lista pela versão devolvida pelo backend (ex.: após uma avaliação).
+  const atualizarTrecho = useCallback((trechoAtualizado) => {
+    setTrechos((lista) => lista.map((trecho) => (trecho.id === trechoAtualizado.id ? trechoAtualizado : trecho)));
+  }, []);
+
+  return { trechos, carregando, erro, atualizarTrecho };
 }
