@@ -19,12 +19,23 @@ export function validarLogin({ email, senha }) {
   return erros;
 }
 
+function validarNome(nome) {
+  const tamanho = (nome ?? "").trim().length;
+  if (tamanho < LIMITES_CONTA.nomeMin || tamanho > LIMITES_CONTA.nomeMax) {
+    return `O nome deve ter entre ${LIMITES_CONTA.nomeMin} e ${LIMITES_CONTA.nomeMax} caracteres.`;
+  }
+  return null;
+}
+
+export function validarPerfil({ nome }) {
+  const erroNome = validarNome(nome);
+  return erroNome ? { nome: erroNome } : {};
+}
+
 export function validarCadastro({ nome, email, senha }) {
   const erros = {};
-  const nomeLimpo = (nome ?? "").trim();
-  if (nomeLimpo.length < LIMITES_CONTA.nomeMin || nomeLimpo.length > LIMITES_CONTA.nomeMax) {
-    erros.nome = `O nome deve ter entre ${LIMITES_CONTA.nomeMin} e ${LIMITES_CONTA.nomeMax} caracteres.`;
-  }
+  const erroNome = validarNome(nome);
+  if (erroNome) erros.nome = erroNome;
   const erroEmail = validarEmail(email);
   if (erroEmail) erros.email = erroEmail;
   const tamanhoSenha = (senha ?? "").length;

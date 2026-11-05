@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { validarCadastro, validarLogin } from "./validacaoAuth";
+import { validarCadastro, validarLogin, validarPerfil } from "./validacaoAuth";
+
+describe("validarPerfil", () => {
+  it("aceita nome entre 2 e 120 caracteres e rejeita fora disso", () => {
+    expect(validarPerfil({ nome: "Ana" })).toEqual({});
+    expect(validarPerfil({ nome: " A " }).nome).toBeDefined();
+    expect(validarPerfil({ nome: "a".repeat(121) }).nome).toBeDefined();
+  });
+});
 
 describe("validarLogin", () => {
   it("aceita e-mail e senha preenchidos", () => {

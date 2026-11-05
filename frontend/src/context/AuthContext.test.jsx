@@ -137,6 +137,20 @@ describe("AuthContext", () => {
     expect(result.current.aviso).toBeNull();
   });
 
+  it("atualizarUsuario troca os dados mantendo token e validade", () => {
+    const original = resposta(ana);
+    salvarSessao(original);
+    const { result } = montar();
+
+    act(() => result.current.atualizarUsuario({ ...ana, nome: "Ana Maria" }));
+
+    expect(result.current.usuario.nome).toBe("Ana Maria");
+    const guardada = JSON.parse(localStorage.getItem(CHAVE_SESSAO));
+    expect(guardada.usuario.nome).toBe("Ana Maria");
+    expect(guardada.token).toBe(original.token);
+    expect(guardada.expiraEm).toBe(original.expiraEm);
+  });
+
   it("useAuth fora do provider lança erro claro", () => {
     expect(() => renderHook(() => useAuth())).toThrow("useAuth precisa ser usado dentro de um AuthProvider");
   });

@@ -52,6 +52,16 @@ export function AuthProvider({ children }) {
 
   const limparAviso = useCallback(() => setAviso(null), []);
 
+  // Troca só os dados do usuário (ex.: nome editado no perfil); o token e a validade continuam os mesmos.
+  const atualizarUsuario = useCallback((usuario) => {
+    setSessao((atual) => {
+      if (!atual) return atual;
+      const nova = { ...atual, usuario };
+      salvarSessao(nova);
+      return nova;
+    });
+  }, []);
+
   const valor = useMemo(
     () => ({
       usuario: sessao?.usuario ?? null,
@@ -62,8 +72,9 @@ export function AuthProvider({ children }) {
       cadastrar,
       sair,
       limparAviso,
+      atualizarUsuario,
     }),
-    [sessao, aviso, entrar, cadastrar, sair, limparAviso]
+    [sessao, aviso, entrar, cadastrar, sair, limparAviso, atualizarUsuario]
   );
 
   return <AuthContext.Provider value={valor}>{children}</AuthContext.Provider>;

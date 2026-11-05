@@ -1,5 +1,5 @@
 import { Link, NavLink } from "react-router-dom";
-import { AlertTriangle, ClipboardCheck, Home, LayoutDashboard, LogIn, LogOut, Map } from "lucide-react";
+import { AlertTriangle, ClipboardCheck, Home, LayoutDashboard, LogIn, LogOut, Map, User } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 
 const links = [
@@ -47,9 +47,10 @@ export default function AppNavbar() {
 
         {autenticado ? (
           <>
-            <span className="hidden max-w-32 truncate px-2 text-sm text-texto-mute lg:inline" title={usuario?.email}>
-              {primeiroNome}
-            </span>
+            <NavLink to="/app/perfil" className={itemClasse} title={`Meu perfil (${usuario?.email})`}>
+              <User size={18} className="shrink-0" />
+              <span className="hidden max-w-32 truncate lg:inline">{primeiroNome}</span>
+            </NavLink>
             <button
               type="button"
               onClick={sair}
