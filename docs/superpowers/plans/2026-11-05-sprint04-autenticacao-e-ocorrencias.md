@@ -47,6 +47,36 @@
 | D7 | Categorias de ocorrência | Lista inicial (seed, editável depois): Buraco na calçada, Calçada quebrada, Falta de iluminação, Falta de acessibilidade, Outro. As quatro primeiras são os exemplos que já aparecem no Vault; "Outro" é novo. |
 | D8 | Fotos | Disco local (`UPLOAD_DIR`), no máx. 3 por ocorrência, 5 MB cada, JPEG/PNG/WebP validados pelo conteúdo (não pela extensão), nome gravado como UUID. Storage em nuvem fica para a publicação. |
 | D9 | Foto obrigatória? | Opcional (a regra atual diz "permite anexar"). |
+| D10 | "Bairro/cidade de atuação" no perfil: texto livre ou escolha entre as regiões existentes? | Opcional e escolhida entre as **regiões já cadastradas** (`usuario.regiao_atuacao_id`, FK para `regiao`). Evita dado livre sujo e reaproveita o modelo existente. |
+| D11 | Ao trocar a senha, o que acontece com os tokens já emitidos? | Aceitar que continuem valendo até expirar (no máximo 2 h) e registrar o risco. Invalidar de imediato exigiria consultar o banco a cada requisição; fica como melhoria. |
+| D12 | Excluir conta: apagar ou anonimizar as contribuições? | **Anonimizar**: avaliações, ocorrências e trechos continuam com autor nulo. Mantém o índice dos trechos íntegro e já é como as chaves estrangeiras foram criadas (`ON DELETE SET NULL`). A foto de perfil é apagada. |
+| D13 | Foto de perfil | Só depois da Fase 3 (reusa o armazenamento de fotos) e visível **apenas para o próprio usuário**. |
+| D14 | Recuperar senha e editar e-mail (com confirmação) | **Fora desta sprint**: dependem de envio de e-mail (provedor, ADR e chave), que o projeto ainda não tem. O e-mail segue somente leitura. |
+| D15 | Preferências de acessibilidade | Tamanho da fonte entra já (só frontend, guardado no navegador). **Alto contraste** só depois que [[Acessibilidade]] (hoje "a definir") fixar as diretrizes de contraste. |
+
+## Meu perfil: o que já existe e onde cada item da lista entra
+
+Estado em 2026-11-05 (Fases 1 e 2 concluídas): a tela `/app/perfil` mostra e-mail (somente leitura), tipo de conta e permite editar o **nome**; o botão "Sair" está na barra de navegação.
+
+| Item da lista | Situação | Onde entra |
+|---|---|---|
+| Ver/editar nome | ✅ feito | — |
+| E-mail somente leitura | ✅ feito | edição com confirmação fica fora (D14) |
+| Bairro/cidade de atuação | ❌ | Fase 5B (D10) |
+| Foto de perfil | ❌ | Fase 5B, depois da Fase 3 (D13) |
+| Alterar senha | ❌ | **Fase 2B** |
+| Sair da conta | ⚠️ só na barra | **Fase 2B** (botão também na tela de perfil) |
+| Minhas avaliações (histórico, RF09) | ❌, mas os dados já existem (`avaliacao.usuario_id`, V6) | **Fase 2B** |
+| Resumo de atividade | ❌ | **Fase 2B** (avaliações) e Fase 4 (ocorrências e resolvidas) |
+| Preferências de acessibilidade | ❌ | **Fase 2B**: tamanho da fonte; alto contraste depois (D15) |
+| Atalho do administrador (Dashboard) | ❌ | **Fase 2B**; fila de moderação na Fase 4 |
+| Minhas ocorrências (filtro por status, foto, abrir no mapa) | ❌, depende de ocorrências | Fase 4 |
+| Editar/excluir ocorrência ainda "Aberta" | ❌, depende de ocorrências | Fases 3 e 4 |
+| Editar minha avaliação | ❌, depende de D6 | Fase 5 |
+| Ocorrências que o administrador já tratou | ❌, exige guardar quem tratou | Fases 3 e 4 |
+| Excluir conta (LGPD) | ❌ | Fase 5B (D12) |
+| Recuperar senha | ❌, exige e-mail | fora da sprint (D14) |
+| Gestor = Administrador? | decidido como o mesmo papel (D2) | perfil mostra os atalhos de administrador |
 
 ## Estrutura de fases
 
@@ -55,10 +85,12 @@ Cada fase entrega software testável sozinha e termina com commit + documentaç�
 | Fase | Entrega | Depende de |
 |---|---|---|
 | 1 | Backend de autenticação (usuário, registro, login, `/usuarios/me`, papéis, proteção de rotas, autor) | D1–D3 |
-| 2 | Frontend de autenticação (login, cadastro, sessão, rota protegida, convite a entrar) | Fase 1 |
-| 3 | Backend de ocorrências (categorias, ocorrência, foto, moderação) | Fase 1, D5, D7–D9 |
-| 4 | Frontend de ocorrências (formulário com foto, tela de moderação do admin) | Fases 2 e 3 |
+| 2 | Frontend de autenticação (login, cadastro, sessão, rota protegida, convite a entrar, perfil básico) | Fase 1 |
+| 2B | **Meu perfil, parte já possível:** minhas avaliações, resumo, alterar senha, sair, fonte, atalho de admin | Fases 1 e 2, D11, D15 |
+| 3 | Backend de ocorrências (categorias, ocorrência, foto, moderação; editar/excluir própria "Aberta"; quem tratou) | Fase 1, D5, D7–D9 |
+| 4 | Frontend de ocorrências (formulário com foto, minhas ocorrências, moderação; resumo completo) | Fases 2, 2B e 3 |
 | 5 | Reavaliação (uma por usuário) — opcional | Fase 1, D6 |
+| 5B | **Conta e privacidade:** região de atuação, foto de perfil, excluir conta | Fases 3 e 4, D10, D12, D13 |
 | 6 | Fechamento: segurança, verificação ponta a ponta, Vault, ADRs | todas |
 
 Recomendação de execução: **Fases 1+2 primeiro** (autenticação completa) e só depois 3+4, para revisar e testar manualmente cada metade.
@@ -208,6 +240,53 @@ Comportamento: sem login, "Avaliar" e "Adicionar trecho" mostram um aviso "Entre
 
 ---
 
+## Fase 2B — Meu perfil (o que já dá para entregar sem ocorrências)
+
+### Tarefa 2B.1: Backend — minhas avaliações e resumo
+
+**Arquivos:** `repository/AvaliacaoRepository.java` (`Page<Avaliacao> findByUsuarioId(UUID, Pageable)` com `@EntityGraph` carregando o trecho; `long countByUsuarioId(UUID)`), `dto/MinhaAvaliacaoDto` (`id`, `trechoId`, `trechoNome`, as 6 notas, `indice`, `classificacao`, `indiceAtualDoTrecho`, `criadoEm`), `dto/PaginaDto<T>` (`itens`, `pagina`, `tamanho`, `total`), `dto/ResumoAtividadeDto` (`totalAvaliacoes`), `service/UsuarioService.java`, `controller/UsuarioController.java`, testes de integração.
+
+Endpoints (ambos exigem login e olham **só** o usuário do token):
+- `GET /api/v1/usuarios/me/avaliacoes?pagina=0&tamanho=20` — mais recentes primeiro, `tamanho` máximo 50.
+- `GET /api/v1/usuarios/me/resumo` — por enquanto só `totalAvaliacoes`; a Fase 4 acrescenta ocorrências (sem campos falsos antes disso).
+
+"Índice resultante" = o **índice dessa avaliação** (as 6 notas ponderadas por `CalculadoraIndice`, sem gravar nada novo), e o `indiceAtualDoTrecho` vem ao lado para comparação. Avaliações anônimas antigas nunca aparecem para ninguém.
+
+- [ ] Testes: lista só as do usuário (outro usuário não aparece), ordem decrescente, paginação e limite de 50, índice calculado confere com a conta manual, anônimas de antes não entram, sem token → 401.
+- [ ] Implementar e commitar.
+
+### Tarefa 2B.2: Backend — alterar senha
+
+**Arquivos:** `dto/AlterarSenhaRequestDto` (`senhaAtual`, `novaSenha` de 8 a 72), `UsuarioService.alterarSenha`, `PUT /api/v1/usuarios/me/senha` → `204`, testes.
+
+Pontos que exigem cuidado:
+- Senha atual errada responde **`400`**, nunca `401`: o frontend trata `401` fora de `/auth/` como "sessão expirada" e deslogaria a pessoa por engano.
+- Nova senha igual à atual → `400`. A senha nunca é registrada em log.
+- Tokens antigos continuam valendo até expirar (D11); registrar o risco na ADR de autenticação.
+- Sem limite de tentativas ainda: quem tem um token roubado poderia tentar adivinhar a senha atual. Segue na lista de riscos (rate limit).
+
+- [ ] Testes: troca com sucesso (login com a nova funciona, com a antiga falha), atual errada → 400, igual à atual → 400, curta → 400, sem token → 401, hash novo é BCrypt.
+
+### Tarefa 2B.3: Frontend — tela de perfil completa
+
+**Arquivos:** `services/usuarioService.js` (`buscarMinhasAvaliacoes`, `buscarResumo`, `alterarSenha`), `hooks/useMinhasAvaliacoes.js`, `components/perfil/` (`ResumoAtividade.jsx`, `MinhasAvaliacoes.jsx`, `AlterarSenha.jsx`, `AtalhosAdmin.jsx`), `pages/Perfil.jsx` (vira a "casca" com as seções; a edição do nome atual vira `DadosConta.jsx`), `pages/Mapa.jsx` (lê `?trecho=<id>`, seleciona o trecho e centraliza quando os trechos carregarem), testes.
+
+- [ ] Seções: resumo (cards), dados da conta, minhas avaliações (nome do trecho, 6 notas, índice, faixa pelo `indiceConfig`, data, "Ver no mapa"), segurança (senha atual, nova; erro do servidor visível), botão **Sair da conta**.
+- [ ] Administrador vê "Atalhos": link para o Dashboard (a fila de moderação entra na Fase 4).
+- [ ] Estados vazio ("Você ainda não avaliou nenhum trecho"), carregando e erro; paginação "Carregar mais".
+- [ ] `npm run lint` sem avisos novos; commit.
+
+### Tarefa 2B.4: Preferência de tamanho da fonte
+
+**Arquivos:** `config/preferenciasConfig.js`, `context/PreferenciasContext.jsx` (+ hook em arquivo separado, como no `useAuth`), `components/perfil/PreferenciasAcessibilidade.jsx`, `main.jsx`, testes.
+
+Três tamanhos (100%, 112,5% e 125% do `font-size` da raiz), guardados no `localStorage` e aplicados na subida. Alto contraste **não** entra agora (D15): sem diretriz de contraste definida, criar um tema "alto contraste" seria inventar regra de design.
+
+- [ ] Testes: preferência persiste e é restaurada; valor inválido no armazenamento volta ao padrão.
+- [ ] **Verificação manual** de toda a Fase 2B no navegador pelo Tech Lead.
+
+---
+
 ## Fase 3 — Backend de ocorrências
 
 ### Tarefa 3.1: Categorias
@@ -237,6 +316,11 @@ CREATE INDEX idx_ocorrencia_status ON ocorrencia(status);
 ```
 
 Endpoints (conforme [[Ocorrencias]]): `POST /api/v1/trechos/{id}/ocorrencias` (autenticado; 201; trecho inativo → 409 como em avaliação), `GET /api/v1/ocorrencias?status=&trechoId=&pagina=&tamanho=` (admin, paginado, máx. 50 por página), `PATCH /api/v1/ocorrencias/{id}` (admin; corpo `{ "status": "..." }`).
+
+**Acréscimos vindos do Meu perfil:**
+- `GET /api/v1/usuarios/me/ocorrencias?status=&pagina=&tamanho=` (do usuário do token, com categoria, status, data e fotos) e `totalOcorrencias` / `ocorrenciasResolvidas` no `GET /usuarios/me/resumo`.
+- `PUT /api/v1/ocorrencias/{id}` (categoria e descrição) e `DELETE /api/v1/ocorrencias/{id}` **só pelo dono e só com status `ABERTA`**; depois disso `409` com mensagem clara. Excluir remove as fotos do disco.
+- Coluna `ocorrencia.tratada_por_id` (FK `usuario`, `ON DELETE SET NULL`), preenchida na primeira mudança de status feita por um administrador, e filtro `GET /ocorrencias?tratadasPorMim=true` (admin) para "ocorrências que já tratei".
 
 Transições de status (D5) a testar: `ABERTA→EM_ANALISE|REJEITADA`, `EM_ANALISE→RESOLVIDA|REJEITADA`; qualquer outra → 409 com mensagem clara; `RESOLVIDA` e `REJEITADA` são finais.
 
@@ -269,6 +353,8 @@ Fluxo: cria a ocorrência, depois envia as fotos uma a uma; se uma foto falhar, 
 
 - [ ] Em dispositivo móvel, `input type="file" accept="image/*"` permite câmera ou galeria ([[Ocorrência - UX]] deixa isso a definir — registrar a escolha).
 - [ ] Atualizar `pages/Ocorrencia.jsx` (hoje placeholder) para listar "minhas ocorrências" com status (`GET /usuarios/me/ocorrencias`, **novo endpoint**, a documentar em [[Usuarios]]).
+- [ ] **Minhas ocorrências também no Meu perfil** (`components/perfil/MinhasOcorrencias.jsx`, reaproveitado pela página Ocorrência): categoria, miniatura da foto, data, status, filtro por status, "Ver no mapa" (`?trecho=<id>`), e **editar/excluir** enquanto `ABERTA` (botões somem nos demais status, com confirmação antes de excluir).
+- [ ] `ResumoAtividade` passa a mostrar total de ocorrências e quantas foram resolvidas.
 - [ ] Commit.
 
 ### Tarefa 4.2: Moderação do administrador (UC05)
@@ -276,6 +362,7 @@ Fluxo: cria a ocorrência, depois envia as fotos uma a uma; se uma foto falhar, 
 **Arquivos:** `pages/Moderacao.jsx` (rota `/app/moderacao`, `RotaProtegida apenasAdmin`), `components/moderacao/ListaOcorrencias.jsx`, `DetalheOcorrencia.jsx` (foto, categoria, trecho, autor, botões de transição válidos apenas), item no menu só para admin, testes.
 
 - [ ] Filtro por status, paginação, botões mostram só as transições permitidas pelo backend.
+- [ ] Filtro "Tratadas por mim" na fila, e o atalho "Fila de moderação" nos `AtalhosAdmin` do Meu perfil.
 - [ ] **Verificação manual**: cidadão reporta com foto → admin vê, analisa e muda status → cidadão vê o novo status.
 
 ---
@@ -287,6 +374,33 @@ Fluxo: cria a ocorrência, depois envia as fotos uma a uma; se uma foto falhar, 
 **Arquivos:** `V10__unica_avaliacao_por_usuario_e_trecho.sql` (índice único parcial `WHERE usuario_id IS NOT NULL`, preserva o histórico anônimo), `AvaliacaoService` (upsert dentro da mesma transação com o `PESSIMISTIC_WRITE` já existente), `AvaliacaoResponseDto` (+ `substituida` boolean), `FormularioAvaliacao.jsx` (carrega a nota anterior quando existe — requer `GET /trechos/{id}/avaliacoes/minha`), testes.
 
 - [ ] Testes: segunda avaliação do mesmo usuário substitui a primeira, `totalAvaliacoes` não cresce, índice recalculado; outro usuário soma normalmente; anônimas antigas intactas.
+
+**Acréscimo do Meu perfil:** em "Minhas avaliações" cada item ganha "Editar", que abre o formulário já preenchido (o backend substitui a avaliação, conforme D6). Sem D6 o botão não existe.
+
+---
+
+## Fase 5B — Conta e privacidade (depois das Fases 3 e 4)
+
+### Tarefa 5B.1: Região de atuação (D10)
+
+**Arquivos:** `V__adiciona_regiao_atuacao_ao_usuario.sql` (`usuario.regiao_atuacao_id UUID NULL REFERENCES regiao(id) ON DELETE SET NULL`), `Usuario`, `UsuarioResponseDto` (+ `regiaoAtuacao` com `id` e `nome`), `AtualizarUsuarioRequestDto` (+ `regiaoAtuacaoId` opcional; nulo limpa), `DadosConta.jsx` (seletor usando `useRegioes`), testes (região inexistente → 404; trocar e limpar).
+
+### Tarefa 5B.2: Foto de perfil (D13)
+
+**Arquivos:** coluna `usuario.foto_arquivo`, `POST /api/v1/usuarios/me/foto` (multipart), `GET /api/v1/usuarios/me/foto`, `DELETE /api/v1/usuarios/me/foto`, reaproveitando `ArmazenamentoFotoService` e as mesmas validações da Tarefa 3.3 (tipo pelos bytes, 5 MB, nome UUID, 1 foto: nova substitui e remove a antiga do disco). A foto só é servida ao próprio dono. Frontend: avatar no perfil e na barra de navegação, com iniciais quando não há foto.
+
+### Tarefa 5B.3: Excluir conta (D12)
+
+**Arquivos:** `DELETE /api/v1/usuarios/me` (corpo com a senha para confirmar) → `204`; `UsuarioService.excluir`; frontend `ExcluirConta.jsx` (confirmação exigindo a senha e um aviso do que acontece) → depois `sair()` e mensagem na tela inicial; testes.
+
+Regras e cuidados:
+- Contribuições **anonimizadas** (autor nulo), foto de perfil apagada, índices dos trechos intactos.
+- O **último administrador** não pode ser excluído (`409`), senão o sistema fica sem moderação.
+- O token de uma conta excluída continua válido por até 2 h: nos serviços que gravam autor (avaliação, trecho, ocorrência) verificar se o usuário ainda existe e responder `401` (`SessaoInvalidaException`), em vez de deixar vazar o erro de chave estrangeira como `409` confuso. Teste obrigatório.
+- Fotos de ocorrências já enviadas permanecem com a ocorrência anonimizada; registrar isso no texto de confirmação e na ADR (decisão de privacidade a validar).
+
+- [ ] Testes: exclui com senha certa, senha errada → 400, avaliações/trechos/ocorrências permanecem com autor nulo, último administrador → 409, token antigo depois da exclusão → 401 em `POST` de avaliação.
+- [ ] **Verificação manual** pelo Tech Lead.
 
 ---
 
