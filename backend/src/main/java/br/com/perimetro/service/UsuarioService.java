@@ -1,10 +1,16 @@
 package br.com.perimetro.service;
 
 import br.com.perimetro.dto.AtualizarUsuarioRequestDto;
+import br.com.perimetro.dto.MinhaAvaliacaoDto;
+import br.com.perimetro.dto.PaginaDto;
+import br.com.perimetro.dto.ResumoAtividadeDto;
 import br.com.perimetro.dto.UsuarioResponseDto;
 import br.com.perimetro.entity.Usuario;
 import br.com.perimetro.exception.SessaoInvalidaException;
+import br.com.perimetro.repository.AvaliacaoRepository;
 import br.com.perimetro.repository.UsuarioRepository;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,10 +19,14 @@ import java.util.UUID;
 @Service
 public class UsuarioService {
 
-    private final UsuarioRepository usuarioRepository;
+    static final int TAMANHO_MAXIMO_PAGINA = 50;
 
-    public UsuarioService(UsuarioRepository usuarioRepository) {
+    private final UsuarioRepository usuarioRepository;
+    private final AvaliacaoRepository avaliacaoRepository;
+
+    public UsuarioService(UsuarioRepository usuarioRepository, AvaliacaoRepository avaliacaoRepository) {
         this.usuarioRepository = usuarioRepository;
+        this.avaliacaoRepository = avaliacaoRepository;
     }
 
     @Transactional(readOnly = true)
@@ -30,6 +40,21 @@ public class UsuarioService {
         Usuario usuario = carregar(id);
         usuario.setNome(dto.getNome().trim());
         return UsuarioResponseDto.de(usuarioRepository.save(usuario));
+    }
+
+    /** Histórico das avaliações do próprio usuário, mais recentes primeiro. */
+    @Transactional(readOnly = true)
+    public PaginaDto<MinhaAvaliacaoDto> minhasAvaliacoes(UUID usuarioId, int pagina, int tamanho) {
+        PageRequest pedido = PageRequest.of(
+                Math.max(pagina, 0),
+                Math.min(Math.max(tamanho, 1), TAMANHO_MAXIMO_PAGINA),
+                Sort.by(Sort.Direction.DESC, "criadoEm").and(Sort.by(Sort.Direction.DESC, "id")));
+        return PaginaDto.de(avaliacaoRepository.findByUsuarioId(usuarioId, pedido), MinhaAvaliacaoDto::new);
+    }
+
+    @Transactional(readOnly = true)
+    public ResumoAtividadeDto resumo(UUID usuarioId) {
+        return new ResumoAtividadeDto(avaliacaoRepository.countByUsuarioId(usuarioId));
     }
 
     private Usuario carregar(UUID id) {
