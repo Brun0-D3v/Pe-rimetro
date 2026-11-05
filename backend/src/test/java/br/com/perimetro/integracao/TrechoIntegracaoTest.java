@@ -47,6 +47,20 @@ class TrechoIntegracaoTest extends IntegracaoBase {
     }
 
     @Test
+    void rejeitaTrechoComGeometriaLongaDemaisEExplicaOMotivo() throws Exception {
+        Regiao regiao = regiaoRepository.save(new Regiao("Recife Antigo"));
+        TrechoRequestDto corpo = new TrechoRequestDto("Rua enorme",
+                List.of(new PontoDto(-8.00, -34.87), new PontoDto(-8.06, -34.87)),
+                -8.03, -34.87, regiao.getId(), null);
+
+        mockMvc.perform(post("/api/v1/trechos")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(corpo)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.mensagem").value(org.hamcrest.Matchers.containsString("geometria: é longa demais")));
+    }
+
+    @Test
     void naoPermiteRemoverRegiaoComTrechosVinculados() throws Exception {
         Regiao regiao = regiaoRepository.save(new Regiao("Recife Antigo"));
         criarTrechoViaApi(regiao);

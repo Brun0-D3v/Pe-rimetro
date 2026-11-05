@@ -2,6 +2,7 @@ package br.com.perimetro.integracao;
 
 import br.com.perimetro.IntegracaoBase;
 import br.com.perimetro.dto.PontoDto;
+import br.com.perimetro.dto.TrechoRequestDto;
 import br.com.perimetro.entity.AtivoInativo;
 import br.com.perimetro.entity.Regiao;
 import br.com.perimetro.entity.Trecho;
@@ -94,6 +95,25 @@ class AvaliacaoIntegracaoTest extends IntegracaoBase {
                 .andExpect(status().isConflict());
 
         org.assertj.core.api.Assertions.assertThat(avaliacaoRepository.count()).isZero();
+    }
+
+    @Test
+    void trechoCriadoPeloUsuarioPodeSerAvaliadoEmSeguida() throws Exception {
+        Regiao regiao = regiaoRepository.save(new Regiao("Boa Viagem"));
+        TrechoRequestDto novo = new TrechoRequestDto("Rua do usuário",
+                List.of(new PontoDto(-8.1190, -34.9040), new PontoDto(-8.1200, -34.9050), new PontoDto(-8.1215, -34.9060)),
+                -8.12, -34.905, regiao.getId(), null);
+        String resposta = mockMvc.perform(post("/api/v1/trechos")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(novo)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.totalAvaliacoes").value(0))
+                .andReturn().getResponse().getContentAsString();
+        String id = objectMapper.readTree(resposta).get("id").asString();
+
+        mockMvc.perform(post(URL, id).contentType(MediaType.APPLICATION_JSON).content(corpo(9, 9, 9, 9, 9, 9)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.trecho.classificacao").value("BOM"));
     }
 
     @Test
