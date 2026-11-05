@@ -53,6 +53,12 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(corpo);
     }
 
+    @ExceptionHandler(SessaoInvalidaException.class)
+    public ResponseEntity<ErroResponseDto> tratarSessaoInvalida(SessaoInvalidaException excecao) {
+        ErroResponseDto corpo = new ErroResponseDto(excecao.getMessage(), LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(corpo);
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErroResponseDto> tratarValidacaoInvalida(MethodArgumentNotValidException excecao) {
         String mensagem = excecao.getBindingResult().getFieldErrors().stream()
