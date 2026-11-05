@@ -3,6 +3,7 @@ package br.com.perimetro;
 import br.com.perimetro.repository.AvaliacaoRepository;
 import br.com.perimetro.repository.RegiaoRepository;
 import br.com.perimetro.repository.TrechoRepository;
+import br.com.perimetro.repository.UsuarioRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -31,10 +32,14 @@ public abstract class IntegracaoBase {
     @Autowired
     protected AvaliacaoRepository avaliacaoRepository;
 
+    @Autowired
+    protected UsuarioRepository usuarioRepository;
+
     @BeforeEach
     void limparBanco() {
         avaliacaoRepository.deleteAll();
         trechoRepository.deleteAll();
         regiaoRepository.deleteAll();
+        usuarioRepository.deleteAll();
     }
 }
