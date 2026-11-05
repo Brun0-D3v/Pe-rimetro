@@ -7,12 +7,14 @@ export default function ControlesMapa({ centroPadrao, zoomPadrao, aoLocalizar, e
   const mapa = useMap();
   const elementoRef = useRef(null);
 
-  const classeBotao =
-    "flex h-9 w-9 items-center justify-center rounded-xl border border-base-4 bg-base-3 text-texto shadow-sm transition-colors duration-fast ease-reveal hover:bg-hover-surface";
+  const classeBase =
+    "flex h-9 w-9 items-center justify-center rounded-xl border border-base-4 bg-base-3 shadow-sm transition-colors duration-fast ease-reveal hover:bg-hover-surface";
+  const classeBotao = `${classeBase} text-texto`;
 
+  // A cor do texto é escolhida aqui (não somada) para evitar conflito entre text-texto e text-accent-tech.
   const classeLocalizacao = [
-    classeBotao,
-    estadoLocalizacao === "ativo" ? "text-accent-tech" : "",
+    classeBase,
+    estadoLocalizacao === "ativo" ? "text-accent-tech" : "text-texto",
     estadoLocalizacao === "buscando" ? "animate-pulse" : "",
   ].join(" ");
 
