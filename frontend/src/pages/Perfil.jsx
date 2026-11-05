@@ -4,6 +4,7 @@ import AlterarSenha from "../components/perfil/AlterarSenha";
 import AtalhosAdmin from "../components/perfil/AtalhosAdmin";
 import DadosConta from "../components/perfil/DadosConta";
 import MinhasAvaliacoes from "../components/perfil/MinhasAvaliacoes";
+import PreferenciasAcessibilidade from "../components/perfil/PreferenciasAcessibilidade";
 import ResumoAtividade from "../components/perfil/ResumoAtividade";
 import Button from "../components/ui/Button";
 import { useAuth } from "../hooks/useAuth";
@@ -26,6 +27,7 @@ export default function Perfil() {
       <DadosConta />
       <MinhasAvaliacoes />
       <AlterarSenha />
+      <PreferenciasAcessibilidade />
       {ehAdmin && <AtalhosAdmin />}
       <div>
         <Button variante="secundario" onClick={sairDaConta}>

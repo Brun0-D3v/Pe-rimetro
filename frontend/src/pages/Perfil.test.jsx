@@ -10,6 +10,7 @@ vi.mock("../components/perfil/DadosConta", () => ({ default: () => <p>seção da
 vi.mock("../components/perfil/MinhasAvaliacoes", () => ({ default: () => <p>seção avaliações</p> }));
 vi.mock("../components/perfil/AlterarSenha", () => ({ default: () => <p>seção senha</p> }));
 vi.mock("../components/perfil/AtalhosAdmin", () => ({ default: () => <p>seção admin</p> }));
+vi.mock("../components/perfil/PreferenciasAcessibilidade", () => ({ default: () => <p>seção acessibilidade</p> }));
 
 function montar(auth) {
   useAuth.mockReturnValue(auth);
@@ -31,7 +32,7 @@ describe("Perfil", () => {
   it("junta as seções do cidadão, sem os atalhos de administração", () => {
     montar({ usuario: ana, ehAdmin: false, sair: vi.fn() });
 
-    for (const texto of ["seção resumo", "seção dados", "seção avaliações", "seção senha"]) {
+    for (const texto of ["seção resumo", "seção dados", "seção avaliações", "seção senha", "seção acessibilidade"]) {
       expect(screen.getByText(texto)).toBeTruthy();
     }
     expect(screen.queryByText("seção admin")).toBeNull();
