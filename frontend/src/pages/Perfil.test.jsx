@@ -1,70 +1,54 @@
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { MemoryRouter, Route, Routes } from "react-router-dom";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { useAuth } from "../hooks/useAuth";
-import { atualizarPerfil } from "../services/authService";
 import Perfil from "./Perfil";
 
 vi.mock("../hooks/useAuth", () => ({ useAuth: vi.fn() }));
-vi.mock("../services/authService", () => ({ atualizarPerfil: vi.fn() }));
+vi.mock("../components/perfil/ResumoAtividade", () => ({ default: () => <p>seção resumo</p> }));
+vi.mock("../components/perfil/DadosConta", () => ({ default: () => <p>seção dados</p> }));
+vi.mock("../components/perfil/MinhasAvaliacoes", () => ({ default: () => <p>seção avaliações</p> }));
+vi.mock("../components/perfil/AlterarSenha", () => ({ default: () => <p>seção senha</p> }));
+vi.mock("../components/perfil/AtalhosAdmin", () => ({ default: () => <p>seção admin</p> }));
+
+function montar(auth) {
+  useAuth.mockReturnValue(auth);
+  return render(
+    <MemoryRouter initialEntries={["/app/perfil"]}>
+      <Routes>
+        <Route path="/app/perfil" element={<Perfil />} />
+        <Route path="/" element={<p>página inicial</p>} />
+      </Routes>
+    </MemoryRouter>
+  );
+}
 
 const ana = { id: "u1", nome: "Ana", email: "ana@exemplo.com", perfil: "CIDADAO" };
 
 describe("Perfil", () => {
-  let atualizarUsuario;
-
-  beforeEach(() => {
-    vi.clearAllMocks();
-    atualizarUsuario = vi.fn();
-    useAuth.mockReturnValue({ usuario: ana, atualizarUsuario });
-  });
   afterEach(cleanup);
 
-  it("mostra e-mail, perfil e nome atuais", () => {
-    render(<Perfil />);
-    expect(screen.getByText("ana@exemplo.com")).toBeTruthy();
-    expect(screen.getByText("Cidadão")).toBeTruthy();
-    expect(screen.getByLabelText("Nome").value).toBe("Ana");
+  it("junta as seções do cidadão, sem os atalhos de administração", () => {
+    montar({ usuario: ana, ehAdmin: false, sair: vi.fn() });
+
+    for (const texto of ["seção resumo", "seção dados", "seção avaliações", "seção senha"]) {
+      expect(screen.getByText(texto)).toBeTruthy();
+    }
+    expect(screen.queryByText("seção admin")).toBeNull();
   });
 
-  it("só habilita salvar quando o nome mudou", () => {
-    render(<Perfil />);
-    const botao = screen.getByRole("button", { name: "Salvar alterações" });
-    expect(botao.disabled).toBe(true);
-
-    fireEvent.change(screen.getByLabelText("Nome"), { target: { value: "Ana Maria" } });
-    expect(botao.disabled).toBe(false);
+  it("administrador vê os atalhos de administração", () => {
+    montar({ usuario: { ...ana, perfil: "ADMINISTRADOR" }, ehAdmin: true, sair: vi.fn() });
+    expect(screen.getByText("seção admin")).toBeTruthy();
   });
 
-  it("salva o nome novo e atualiza a sessão", async () => {
-    atualizarPerfil.mockResolvedValue({ ...ana, nome: "Ana Maria" });
-    render(<Perfil />);
+  it("Sair da conta encerra a sessão e volta à página inicial", () => {
+    const sair = vi.fn();
+    montar({ usuario: ana, ehAdmin: false, sair });
 
-    fireEvent.change(screen.getByLabelText("Nome"), { target: { value: "  Ana Maria " } });
-    fireEvent.click(screen.getByRole("button", { name: "Salvar alterações" }));
+    fireEvent.click(screen.getByRole("button", { name: "Sair da conta" }));
 
-    await waitFor(() => expect(screen.getByRole("status").textContent).toBe("Perfil atualizado."));
-    expect(atualizarPerfil).toHaveBeenCalledWith({ nome: "Ana Maria" });
-    expect(atualizarUsuario).toHaveBeenCalledWith({ ...ana, nome: "Ana Maria" });
-  });
-
-  it("não chama o servidor com nome curto demais", () => {
-    render(<Perfil />);
-
-    fireEvent.change(screen.getByLabelText("Nome"), { target: { value: "A" } });
-    fireEvent.click(screen.getByRole("button", { name: "Salvar alterações" }));
-
-    expect(atualizarPerfil).not.toHaveBeenCalled();
-    expect(screen.getByText(/O nome deve ter entre 2 e 120/)).toBeTruthy();
-  });
-
-  it("mostra a mensagem do backend quando salvar falha", async () => {
-    atualizarPerfil.mockRejectedValue({ response: { data: { mensagem: "Sessão inválida" } } });
-    render(<Perfil />);
-
-    fireEvent.change(screen.getByLabelText("Nome"), { target: { value: "Ana Maria" } });
-    fireEvent.click(screen.getByRole("button", { name: "Salvar alterações" }));
-
-    expect((await screen.findByRole("alert")).textContent).toBe("Sessão inválida");
-    expect(atualizarUsuario).not.toHaveBeenCalled();
+    expect(sair).toHaveBeenCalledTimes(1);
+    expect(screen.getByText("página inicial")).toBeTruthy();
   });
 });

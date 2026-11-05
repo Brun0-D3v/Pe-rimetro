@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import Card from "../components/ui/Card";
 import MapaLeaflet from "../components/mapa/MapaLeaflet";
 import PainelDetalheTrecho from "../components/mapa/PainelDetalheTrecho";
@@ -29,6 +30,20 @@ function MapaConteudo() {
 
   const { trechos, carregando, erro, atualizarTrecho, adicionarTrecho } = useTrechos(regiaoSelecionadaId || undefined);
   const { regioes } = useRegioes();
+
+  // `/app?trecho=<id>` (ex.: "Ver no mapa" no perfil) abre o trecho assim que os trechos carregam.
+  // Ajuste de estado durante a renderização, e só uma vez, para não brigar com o usuário depois.
+  const [parametrosUrl] = useSearchParams();
+  const trechoPedidoNaUrl = parametrosUrl.get("trecho");
+  const [urlAplicada, setUrlAplicada] = useState(false);
+  if (!urlAplicada && trechoPedidoNaUrl && trechos.length > 0) {
+    setUrlAplicada(true);
+    const pedido = trechos.find((trecho) => trecho.id === trechoPedidoNaUrl);
+    if (pedido) {
+      setTrechoSelecionado(pedido);
+      setFocoBusca(pedido.geometria[0] ?? null);
+    }
+  }
 
   const { autenticado } = useAuth();
   const [conviteLogin, setConviteLogin] = useState(false);

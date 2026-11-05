@@ -32,6 +32,19 @@ export function validarPerfil({ nome }) {
   return erroNome ? { nome: erroNome } : {};
 }
 
+export function validarTrocaDeSenha({ senhaAtual, novaSenha, confirmacao }) {
+  const erros = {};
+  if (!senhaAtual) erros.senhaAtual = "Informe a senha atual.";
+  const tamanho = (novaSenha ?? "").length;
+  if (tamanho < LIMITES_CONTA.senhaMin || tamanho > LIMITES_CONTA.senhaMax) {
+    erros.novaSenha = `A nova senha deve ter entre ${LIMITES_CONTA.senhaMin} e ${LIMITES_CONTA.senhaMax} caracteres.`;
+  } else if (novaSenha === senhaAtual) {
+    erros.novaSenha = "A nova senha deve ser diferente da atual.";
+  }
+  if (novaSenha !== confirmacao) erros.confirmacao = "As senhas não conferem.";
+  return erros;
+}
+
 export function validarCadastro({ nome, email, senha }) {
   const erros = {};
   const erroNome = validarNome(nome);

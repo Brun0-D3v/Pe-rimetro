@@ -1,5 +1,29 @@
 import { describe, expect, it } from "vitest";
-import { validarCadastro, validarLogin, validarPerfil } from "./validacaoAuth";
+import { validarCadastro, validarLogin, validarPerfil, validarTrocaDeSenha } from "./validacaoAuth";
+
+describe("validarTrocaDeSenha", () => {
+  const valido = { senhaAtual: "antiga-123", novaSenha: "nova-senha-1", confirmacao: "nova-senha-1" };
+
+  it("aceita uma troca correta", () => {
+    expect(validarTrocaDeSenha(valido)).toEqual({});
+  });
+
+  it("exige a senha atual", () => {
+    expect(validarTrocaDeSenha({ ...valido, senhaAtual: "" }).senhaAtual).toBeDefined();
+  });
+
+  it("respeita os limites de 8 a 72 caracteres da nova senha", () => {
+    expect(validarTrocaDeSenha({ ...valido, novaSenha: "1234567", confirmacao: "1234567" }).novaSenha).toBeDefined();
+    const longa = "a".repeat(73);
+    expect(validarTrocaDeSenha({ ...valido, novaSenha: longa, confirmacao: longa }).novaSenha).toBeDefined();
+  });
+
+  it("recusa nova senha igual à atual e confirmação diferente", () => {
+    const igual = { senhaAtual: "mesma-senha", novaSenha: "mesma-senha", confirmacao: "mesma-senha" };
+    expect(validarTrocaDeSenha(igual).novaSenha).toBe("A nova senha deve ser diferente da atual.");
+    expect(validarTrocaDeSenha({ ...valido, confirmacao: "outra-coisa" }).confirmacao).toBe("As senhas não conferem.");
+  });
+});
 
 describe("validarPerfil", () => {
   it("aceita nome entre 2 e 120 caracteres e rejeita fora disso", () => {
