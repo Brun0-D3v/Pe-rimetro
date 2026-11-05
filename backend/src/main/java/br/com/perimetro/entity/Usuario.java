@@ -74,6 +74,10 @@ public class Usuario {
         return senhaHash;
     }
 
+    public void alterarSenhaHash(String novoHash) {
+        this.senhaHash = novoHash;
+    }
+
     public Perfil getPerfil() {
         return perfil;
     }

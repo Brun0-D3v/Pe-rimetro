@@ -1,16 +1,19 @@
 package br.com.perimetro.service;
 
+import br.com.perimetro.dto.AlterarSenhaRequestDto;
 import br.com.perimetro.dto.AtualizarUsuarioRequestDto;
 import br.com.perimetro.dto.MinhaAvaliacaoDto;
 import br.com.perimetro.dto.PaginaDto;
 import br.com.perimetro.dto.ResumoAtividadeDto;
 import br.com.perimetro.dto.UsuarioResponseDto;
 import br.com.perimetro.entity.Usuario;
+import br.com.perimetro.exception.SenhaInvalidaException;
 import br.com.perimetro.exception.SessaoInvalidaException;
 import br.com.perimetro.repository.AvaliacaoRepository;
 import br.com.perimetro.repository.UsuarioRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,9 +27,30 @@ public class UsuarioService {
     private final UsuarioRepository usuarioRepository;
     private final AvaliacaoRepository avaliacaoRepository;
 
-    public UsuarioService(UsuarioRepository usuarioRepository, AvaliacaoRepository avaliacaoRepository) {
+    private final PasswordEncoder passwordEncoder;
+
+    public UsuarioService(UsuarioRepository usuarioRepository, AvaliacaoRepository avaliacaoRepository,
+                          PasswordEncoder passwordEncoder) {
         this.usuarioRepository = usuarioRepository;
         this.avaliacaoRepository = avaliacaoRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
+
+    /**
+     * Troca a senha exigindo a atual. Tokens já emitidos continuam valendo até expirar (decisão D11 do
+     * plano da Sprint 04): invalidar na hora exigiria consultar o banco a cada requisição.
+     */
+    @Transactional
+    public void alterarSenha(UUID id, AlterarSenhaRequestDto dto) {
+        Usuario usuario = carregar(id);
+        if (!passwordEncoder.matches(dto.getSenhaAtual(), usuario.getSenhaHash())) {
+            throw new SenhaInvalidaException("Senha atual incorreta");
+        }
+        if (dto.getNovaSenha().equals(dto.getSenhaAtual())) {
+            throw new SenhaInvalidaException("A nova senha deve ser diferente da atual");
+        }
+        usuario.alterarSenhaHash(passwordEncoder.encode(dto.getNovaSenha()));
+        usuarioRepository.save(usuario);
     }
 
     @Transactional(readOnly = true)
