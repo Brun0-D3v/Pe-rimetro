@@ -12,6 +12,7 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
@@ -63,6 +64,30 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErroResponseDto> tratarOcorrenciaNaoEditavel(OcorrenciaNaoEditavelException excecao) {
         ErroResponseDto corpo = new ErroResponseDto(excecao.getMessage(), LocalDateTime.now());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(corpo);
+    }
+
+    @ExceptionHandler(ArquivoInvalidoException.class)
+    public ResponseEntity<ErroResponseDto> tratarArquivoInvalido(ArquivoInvalidoException excecao) {
+        ErroResponseDto corpo = new ErroResponseDto(excecao.getMessage(), LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(corpo);
+    }
+
+    @ExceptionHandler(LimiteFotosException.class)
+    public ResponseEntity<ErroResponseDto> tratarLimiteFotos(LimiteFotosException excecao) {
+        ErroResponseDto corpo = new ErroResponseDto(excecao.getMessage(), LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(corpo);
+    }
+
+    @ExceptionHandler(FotoNaoEncontradaException.class)
+    public ResponseEntity<ErroResponseDto> tratarFotoNaoEncontrada(FotoNaoEncontradaException excecao) {
+        ErroResponseDto corpo = new ErroResponseDto(excecao.getMessage(), LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(corpo);
+    }
+
+    @ExceptionHandler({ArquivoMuitoGrandeException.class, MaxUploadSizeExceededException.class})
+    public ResponseEntity<ErroResponseDto> tratarArquivoGrandeDemais(Exception excecao) {
+        ErroResponseDto corpo = new ErroResponseDto("A foto deve ter no máximo 5 MB", LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.CONTENT_TOO_LARGE).body(corpo);
     }
 
     @ExceptionHandler(EmailJaCadastradoException.class)

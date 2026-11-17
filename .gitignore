@@ -19,3 +19,6 @@ frontend/dist-ssr/
 
 # Worktrees de agente (scratch, não versionado)
 .claude/worktrees/
+
+# Fotos enviadas pelos usuarios (armazenamento local)
+uploads/

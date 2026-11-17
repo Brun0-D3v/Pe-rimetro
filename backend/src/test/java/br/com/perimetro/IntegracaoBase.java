@@ -14,15 +14,37 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import tools.jackson.databind.ObjectMapper;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.UUID;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 @Import(TestcontainersConfiguration.class)
 public abstract class IntegracaoBase {
+
+    /** Pasta temporária de upload: os testes nunca escrevem no diretório real de fotos. */
+    protected static final Path PASTA_UPLOAD = criarPastaTemporaria();
+
+    private static Path criarPastaTemporaria() {
+        try {
+            return Files.createTempDirectory("perimetro-upload");
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+    }
+
+    @DynamicPropertySource
+    static void propriedadesDeUpload(DynamicPropertyRegistry registro) {
+        registro.add("perimetro.upload.diretorio", () -> PASTA_UPLOAD.toString());
+    }
 
     @Autowired
     protected MockMvc mockMvc;
