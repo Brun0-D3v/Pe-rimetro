@@ -3,13 +3,16 @@ package br.com.perimetro.service;
 import br.com.perimetro.dto.AlterarSenhaRequestDto;
 import br.com.perimetro.dto.AtualizarUsuarioRequestDto;
 import br.com.perimetro.dto.MinhaAvaliacaoDto;
+import br.com.perimetro.dto.OcorrenciaResponseDto;
 import br.com.perimetro.dto.PaginaDto;
 import br.com.perimetro.dto.ResumoAtividadeDto;
 import br.com.perimetro.dto.UsuarioResponseDto;
+import br.com.perimetro.entity.StatusOcorrencia;
 import br.com.perimetro.entity.Usuario;
 import br.com.perimetro.exception.SenhaInvalidaException;
 import br.com.perimetro.exception.SessaoInvalidaException;
 import br.com.perimetro.repository.AvaliacaoRepository;
+import br.com.perimetro.repository.OcorrenciaRepository;
 import br.com.perimetro.repository.UsuarioRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -26,13 +29,18 @@ public class UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
     private final AvaliacaoRepository avaliacaoRepository;
+    private final OcorrenciaRepository ocorrenciaRepository;
+    private final OcorrenciaService ocorrenciaService;
 
     private final PasswordEncoder passwordEncoder;
 
     public UsuarioService(UsuarioRepository usuarioRepository, AvaliacaoRepository avaliacaoRepository,
+                          OcorrenciaRepository ocorrenciaRepository, OcorrenciaService ocorrenciaService,
                           PasswordEncoder passwordEncoder) {
         this.usuarioRepository = usuarioRepository;
         this.avaliacaoRepository = avaliacaoRepository;
+        this.ocorrenciaRepository = ocorrenciaRepository;
+        this.ocorrenciaService = ocorrenciaService;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -78,7 +86,15 @@ public class UsuarioService {
 
     @Transactional(readOnly = true)
     public ResumoAtividadeDto resumo(UUID usuarioId) {
-        return new ResumoAtividadeDto(avaliacaoRepository.countByUsuarioId(usuarioId));
+        return new ResumoAtividadeDto(avaliacaoRepository.countByUsuarioId(usuarioId),
+                ocorrenciaRepository.countByUsuarioId(usuarioId));
+    }
+
+    /** Ocorrências do próprio usuário (visíveis e ocultas), mais recentes primeiro; limite de 50 por página. */
+    @Transactional(readOnly = true)
+    public PaginaDto<OcorrenciaResponseDto> minhasOcorrencias(UUID usuarioId, StatusOcorrencia status,
+                                                              int pagina, int tamanho) {
+        return ocorrenciaService.minhas(usuarioId, status, pagina, Math.min(tamanho, TAMANHO_MAXIMO_PAGINA));
     }
 
     private Usuario carregar(UUID id) {

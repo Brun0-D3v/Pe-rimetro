@@ -3,6 +3,8 @@ package br.com.perimetro;
 import br.com.perimetro.entity.Perfil;
 import br.com.perimetro.entity.Usuario;
 import br.com.perimetro.repository.AvaliacaoRepository;
+import br.com.perimetro.repository.FotoRepository;
+import br.com.perimetro.repository.OcorrenciaRepository;
 import br.com.perimetro.repository.RegiaoRepository;
 import br.com.perimetro.repository.TrechoRepository;
 import br.com.perimetro.repository.UsuarioRepository;
@@ -38,6 +40,12 @@ public abstract class IntegracaoBase {
     protected AvaliacaoRepository avaliacaoRepository;
 
     @Autowired
+    protected OcorrenciaRepository ocorrenciaRepository;
+
+    @Autowired
+    protected FotoRepository fotoRepository;
+
+    @Autowired
     protected UsuarioRepository usuarioRepository;
 
     @Autowired
@@ -52,6 +60,8 @@ public abstract class IntegracaoBase {
 
     @BeforeEach
     void limparBanco() {
+        fotoRepository.deleteAll();
+        ocorrenciaRepository.deleteAll();
         avaliacaoRepository.deleteAll();
         trechoRepository.deleteAll();
         regiaoRepository.deleteAll();

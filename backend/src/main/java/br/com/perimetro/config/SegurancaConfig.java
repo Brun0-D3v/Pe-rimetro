@@ -94,8 +94,11 @@ public class SegurancaConfig {
                         .requestMatchers(HttpMethod.OPTIONS, ROTAS_API).permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/**").permitAll()
                         .requestMatchers("/api/v1/usuarios/**").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/ocorrencias").hasRole("ADMINISTRADOR")
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/ocorrencias/*").hasRole("ADMINISTRADOR")
                         .requestMatchers(HttpMethod.GET, ROTAS_API).permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/v1/trechos", "/api/v1/trechos/*/avaliacoes").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/trechos", "/api/v1/trechos/*/avaliacoes",
+                                "/api/v1/trechos/*/ocorrencias").authenticated()
                         .requestMatchers("/api/v1/trechos/**", "/api/v1/regioes/**").hasRole("ADMINISTRADOR")
                         .anyRequest().authenticated())
                 .oauth2ResourceServer(servidor -> servidor

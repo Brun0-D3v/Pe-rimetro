@@ -3,9 +3,11 @@ package br.com.perimetro.controller;
 import br.com.perimetro.dto.AlterarSenhaRequestDto;
 import br.com.perimetro.dto.AtualizarUsuarioRequestDto;
 import br.com.perimetro.dto.MinhaAvaliacaoDto;
+import br.com.perimetro.dto.OcorrenciaResponseDto;
 import br.com.perimetro.dto.PaginaDto;
 import br.com.perimetro.dto.ResumoAtividadeDto;
 import br.com.perimetro.dto.UsuarioResponseDto;
+import br.com.perimetro.entity.StatusOcorrencia;
 import br.com.perimetro.service.UsuarioService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
@@ -56,6 +58,14 @@ public class UsuarioController {
                                                          @RequestParam(defaultValue = "0") int pagina,
                                                          @RequestParam(defaultValue = "20") int tamanho) {
         return usuarioService.minhasAvaliacoes(idDe(autenticacao), pagina, tamanho);
+    }
+
+    @GetMapping("/me/ocorrencias")
+    public PaginaDto<OcorrenciaResponseDto> minhasOcorrencias(Authentication autenticacao,
+                                                              @RequestParam(required = false) StatusOcorrencia status,
+                                                              @RequestParam(defaultValue = "0") int pagina,
+                                                              @RequestParam(defaultValue = "20") int tamanho) {
+        return usuarioService.minhasOcorrencias(idDe(autenticacao), status, pagina, tamanho);
     }
 
     @GetMapping("/me/resumo")

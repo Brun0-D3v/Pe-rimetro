@@ -41,6 +41,30 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(corpo);
     }
 
+    @ExceptionHandler(CategoriaNaoEncontradaException.class)
+    public ResponseEntity<ErroResponseDto> tratarCategoriaNaoEncontrada(CategoriaNaoEncontradaException excecao) {
+        ErroResponseDto corpo = new ErroResponseDto(excecao.getMessage(), LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(corpo);
+    }
+
+    @ExceptionHandler(OcorrenciaNaoEncontradaException.class)
+    public ResponseEntity<ErroResponseDto> tratarOcorrenciaNaoEncontrada(OcorrenciaNaoEncontradaException excecao) {
+        ErroResponseDto corpo = new ErroResponseDto(excecao.getMessage(), LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(corpo);
+    }
+
+    @ExceptionHandler(AcessoNegadoException.class)
+    public ResponseEntity<ErroResponseDto> tratarAcessoNegado(AcessoNegadoException excecao) {
+        ErroResponseDto corpo = new ErroResponseDto(excecao.getMessage(), LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(corpo);
+    }
+
+    @ExceptionHandler(OcorrenciaNaoEditavelException.class)
+    public ResponseEntity<ErroResponseDto> tratarOcorrenciaNaoEditavel(OcorrenciaNaoEditavelException excecao) {
+        ErroResponseDto corpo = new ErroResponseDto(excecao.getMessage(), LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(corpo);
+    }
+
     @ExceptionHandler(EmailJaCadastradoException.class)
     public ResponseEntity<ErroResponseDto> tratarEmailJaCadastrado(EmailJaCadastradoException excecao) {
         ErroResponseDto corpo = new ErroResponseDto(excecao.getMessage(), LocalDateTime.now());
