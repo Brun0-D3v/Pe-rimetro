@@ -15,6 +15,10 @@ export default function ResumoAtividade() {
             <dt className="text-xs font-semibold uppercase tracking-wide text-texto-mute">Avaliações</dt>
             <dd className="mt-1 text-2xl font-semibold text-texto">{resumo ? resumo.totalAvaliacoes : "–"}</dd>
           </div>
+          <div className="rounded-xl bg-base-2 px-4 py-3">
+            <dt className="text-xs font-semibold uppercase tracking-wide text-texto-mute">Ocorrências</dt>
+            <dd className="mt-1 text-2xl font-semibold text-texto">{resumo ? resumo.totalOcorrencias : "–"}</dd>
+          </div>
         </dl>
       )}
     </Card>

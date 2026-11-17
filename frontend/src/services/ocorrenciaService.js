@@ -25,3 +25,11 @@ export async function buscarContagemPorTrecho() {
 export async function listarDoTrecho(trechoId, { pagina = 0, tamanho = 10 } = {}) {
   return (await api.get(`/trechos/${trechoId}/ocorrencias`, { params: { pagina, tamanho } })).data;
 }
+
+export async function editarOcorrencia(id, { categoriaId, descricao }) {
+  return (await api.put(`/ocorrencias/${id}`, { categoriaId, descricao })).data;
+}
+
+export async function excluirOcorrencia(id) {
+  await api.delete(`/ocorrencias/${id}`);
+}

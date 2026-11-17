@@ -5,6 +5,11 @@ export async function buscarMinhasAvaliacoes({ pagina = 0, tamanho = 20 } = {}) 
   return resposta.data;
 }
 
+export async function buscarMinhasOcorrencias({ status, pagina = 0, tamanho = 20 } = {}) {
+  const resposta = await api.get("/usuarios/me/ocorrencias", { params: { status, pagina, tamanho } });
+  return resposta.data;
+}
+
 export async function buscarResumo() {
   const resposta = await api.get("/usuarios/me/resumo");
   return resposta.data;

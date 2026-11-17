@@ -8,6 +8,7 @@ vi.mock("../hooks/useAuth", () => ({ useAuth: vi.fn() }));
 vi.mock("../components/perfil/ResumoAtividade", () => ({ default: () => <p>seção resumo</p> }));
 vi.mock("../components/perfil/DadosConta", () => ({ default: () => <p>seção dados</p> }));
 vi.mock("../components/perfil/MinhasAvaliacoes", () => ({ default: () => <p>seção avaliações</p> }));
+vi.mock("../components/perfil/MinhasOcorrencias", () => ({ default: () => <p>seção ocorrências</p> }));
 vi.mock("../components/perfil/AlterarSenha", () => ({ default: () => <p>seção senha</p> }));
 vi.mock("../components/perfil/AtalhosAdmin", () => ({ default: () => <p>seção admin</p> }));
 vi.mock("../components/perfil/PreferenciasAcessibilidade", () => ({ default: () => <p>seção acessibilidade</p> }));
