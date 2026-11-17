@@ -1,6 +1,9 @@
 package br.com.perimetro.repository;
 
 import br.com.perimetro.entity.Avaliacao;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -10,6 +13,11 @@ import java.util.UUID;
 public interface AvaliacaoRepository extends JpaRepository<Avaliacao, UUID> {
 
     long countByTrechoId(UUID trechoId);
+
+    long countByUsuarioId(UUID usuarioId);
+
+    @EntityGraph(attributePaths = "trecho")
+    Page<Avaliacao> findByUsuarioId(UUID usuarioId, Pageable pageable);
 
     @Query("""
             select avg(a.notaCalcada) as calcada,

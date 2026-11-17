@@ -1,5 +1,6 @@
 import { Link, NavLink } from "react-router-dom";
-import { AlertTriangle, ClipboardCheck, Home, LayoutDashboard, Map } from "lucide-react";
+import { AlertTriangle, ClipboardCheck, Home, LayoutDashboard, LogIn, LogOut, Map, ShieldCheck, User } from "lucide-react";
+import { useAuth } from "../hooks/useAuth";
 
 const links = [
   { to: "/app", label: "Mapa", icon: Map, end: true },
@@ -18,6 +19,9 @@ function itemClasse({ isActive }) {
 }
 
 export default function AppNavbar() {
+  const { autenticado, ehAdmin, usuario, sair } = useAuth();
+  const primeiroNome = usuario?.nome?.split(" ")[0];
+
   return (
     <nav aria-label="Navegação principal" className="fixed left-1/2 top-4 z-40 -translate-x-1/2">
       <div className="flex items-center gap-1 rounded-full border border-base-4 bg-primary-surface px-2 py-2 shadow-lg">
@@ -38,6 +42,38 @@ export default function AppNavbar() {
             <span className="hidden md:inline">{label}</span>
           </NavLink>
         ))}
+
+        {ehAdmin && (
+          <NavLink to="/app/moderacao" className={itemClasse} title="Moderação">
+            <ShieldCheck size={18} className="shrink-0" />
+            <span className="hidden md:inline">Moderação</span>
+          </NavLink>
+        )}
+
+        <span className="mx-1 h-5 w-px bg-base-4" aria-hidden="true" />
+
+        {autenticado ? (
+          <>
+            <NavLink to="/app/perfil" className={itemClasse} title={`Meu perfil (${usuario?.email})`}>
+              <User size={18} className="shrink-0" />
+              <span className="hidden max-w-32 truncate lg:inline">{primeiroNome}</span>
+            </NavLink>
+            <button
+              type="button"
+              onClick={sair}
+              title="Sair da conta"
+              className="flex items-center gap-2 rounded-full px-3 py-2 text-sm font-medium text-texto-mute transition-colors duration-fast ease-reveal hover:bg-white/5 hover:text-white"
+            >
+              <LogOut size={18} className="shrink-0" />
+              <span className="hidden md:inline">Sair</span>
+            </button>
+          </>
+        ) : (
+          <NavLink to="/entrar" className={itemClasse} title="Entrar">
+            <LogIn size={18} className="shrink-0" />
+            <span className="hidden md:inline">Entrar</span>
+          </NavLink>
+        )}
       </div>
     </nav>
   );

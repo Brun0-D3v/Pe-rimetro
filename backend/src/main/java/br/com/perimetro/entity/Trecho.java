@@ -50,6 +50,10 @@ public class Trecho {
     @Column(nullable = false, length = 20)
     private AtivoInativo status;
 
+    // Nulo nos trechos anônimos criados antes da Sprint 04.
+    @Column(name = "criado_por_id")
+    private UUID criadoPorId;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "regiao_id", nullable = false)
     private Regiao regiao;
@@ -69,6 +73,14 @@ public class Trecho {
 
     public UUID getId() {
         return id;
+    }
+
+    public UUID getCriadoPorId() {
+        return criadoPorId;
+    }
+
+    public void registrarAutor(UUID criadoPorId) {
+        this.criadoPorId = criadoPorId;
     }
 
     public String getNome() {

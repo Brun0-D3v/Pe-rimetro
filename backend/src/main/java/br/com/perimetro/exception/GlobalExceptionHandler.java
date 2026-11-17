@@ -12,6 +12,7 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
@@ -39,6 +40,78 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErroResponseDto> tratarTrechoInativo(TrechoInativoException excecao) {
         ErroResponseDto corpo = new ErroResponseDto(excecao.getMessage(), LocalDateTime.now());
         return ResponseEntity.status(HttpStatus.CONFLICT).body(corpo);
+    }
+
+    @ExceptionHandler(CategoriaNaoEncontradaException.class)
+    public ResponseEntity<ErroResponseDto> tratarCategoriaNaoEncontrada(CategoriaNaoEncontradaException excecao) {
+        ErroResponseDto corpo = new ErroResponseDto(excecao.getMessage(), LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(corpo);
+    }
+
+    @ExceptionHandler(OcorrenciaNaoEncontradaException.class)
+    public ResponseEntity<ErroResponseDto> tratarOcorrenciaNaoEncontrada(OcorrenciaNaoEncontradaException excecao) {
+        ErroResponseDto corpo = new ErroResponseDto(excecao.getMessage(), LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(corpo);
+    }
+
+    @ExceptionHandler(AcessoNegadoException.class)
+    public ResponseEntity<ErroResponseDto> tratarAcessoNegado(AcessoNegadoException excecao) {
+        ErroResponseDto corpo = new ErroResponseDto(excecao.getMessage(), LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(corpo);
+    }
+
+    @ExceptionHandler(OcorrenciaNaoEditavelException.class)
+    public ResponseEntity<ErroResponseDto> tratarOcorrenciaNaoEditavel(OcorrenciaNaoEditavelException excecao) {
+        ErroResponseDto corpo = new ErroResponseDto(excecao.getMessage(), LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(corpo);
+    }
+
+    @ExceptionHandler(ArquivoInvalidoException.class)
+    public ResponseEntity<ErroResponseDto> tratarArquivoInvalido(ArquivoInvalidoException excecao) {
+        ErroResponseDto corpo = new ErroResponseDto(excecao.getMessage(), LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(corpo);
+    }
+
+    @ExceptionHandler(LimiteFotosException.class)
+    public ResponseEntity<ErroResponseDto> tratarLimiteFotos(LimiteFotosException excecao) {
+        ErroResponseDto corpo = new ErroResponseDto(excecao.getMessage(), LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(corpo);
+    }
+
+    @ExceptionHandler(FotoNaoEncontradaException.class)
+    public ResponseEntity<ErroResponseDto> tratarFotoNaoEncontrada(FotoNaoEncontradaException excecao) {
+        ErroResponseDto corpo = new ErroResponseDto(excecao.getMessage(), LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(corpo);
+    }
+
+    @ExceptionHandler({ArquivoMuitoGrandeException.class, MaxUploadSizeExceededException.class})
+    public ResponseEntity<ErroResponseDto> tratarArquivoGrandeDemais(Exception excecao) {
+        ErroResponseDto corpo = new ErroResponseDto("A foto deve ter no máximo 5 MB", LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.CONTENT_TOO_LARGE).body(corpo);
+    }
+
+    @ExceptionHandler(EmailJaCadastradoException.class)
+    public ResponseEntity<ErroResponseDto> tratarEmailJaCadastrado(EmailJaCadastradoException excecao) {
+        ErroResponseDto corpo = new ErroResponseDto(excecao.getMessage(), LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(corpo);
+    }
+
+    @ExceptionHandler(CredenciaisInvalidasException.class)
+    public ResponseEntity<ErroResponseDto> tratarCredenciaisInvalidas(CredenciaisInvalidasException excecao) {
+        ErroResponseDto corpo = new ErroResponseDto(excecao.getMessage(), LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(corpo);
+    }
+
+    @ExceptionHandler(SenhaInvalidaException.class)
+    public ResponseEntity<ErroResponseDto> tratarSenhaInvalida(SenhaInvalidaException excecao) {
+        ErroResponseDto corpo = new ErroResponseDto(excecao.getMessage(), LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(corpo);
+    }
+
+    @ExceptionHandler(SessaoInvalidaException.class)
+    public ResponseEntity<ErroResponseDto> tratarSessaoInvalida(SessaoInvalidaException excecao) {
+        ErroResponseDto corpo = new ErroResponseDto(excecao.getMessage(), LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(corpo);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

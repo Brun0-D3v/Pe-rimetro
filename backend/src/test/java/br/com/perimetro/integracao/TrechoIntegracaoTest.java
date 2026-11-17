@@ -1,6 +1,7 @@
 package br.com.perimetro.integracao;
 
 import br.com.perimetro.IntegracaoBase;
+import br.com.perimetro.entity.Perfil;
 import br.com.perimetro.dto.PontoDto;
 import br.com.perimetro.dto.TrechoRequestDto;
 import br.com.perimetro.entity.Regiao;
@@ -25,7 +26,7 @@ class TrechoIntegracaoTest extends IntegracaoBase {
     private String criarTrechoViaApi(Regiao regiao) throws Exception {
         TrechoRequestDto corpo = new TrechoRequestDto(
                 "Rua da Aurora", GEOMETRIA, -8.0631, -34.8711, regiao.getId(), null);
-        String resposta = mockMvc.perform(post("/api/v1/trechos")
+        String resposta = mockMvc.perform(post("/api/v1/trechos").header("Authorization", autorizacao(Perfil.CIDADAO))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(corpo)))
                 .andExpect(status().isCreated())
@@ -53,7 +54,7 @@ class TrechoIntegracaoTest extends IntegracaoBase {
                 List.of(new PontoDto(-8.00, -34.87), new PontoDto(-8.06, -34.87)),
                 -8.03, -34.87, regiao.getId(), null);
 
-        mockMvc.perform(post("/api/v1/trechos")
+        mockMvc.perform(post("/api/v1/trechos").header("Authorization", autorizacao(Perfil.CIDADAO))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(corpo)))
                 .andExpect(status().isBadRequest())
@@ -65,7 +66,7 @@ class TrechoIntegracaoTest extends IntegracaoBase {
         Regiao regiao = regiaoRepository.save(new Regiao("Recife Antigo"));
         criarTrechoViaApi(regiao);
 
-        mockMvc.perform(delete("/api/v1/regioes/{id}", regiao.getId()))
+        mockMvc.perform(delete("/api/v1/regioes/{id}", regiao.getId()).header("Authorization", autorizacao(Perfil.ADMINISTRADOR)))
                 .andExpect(status().isConflict());
     }
 }

@@ -27,7 +27,7 @@ public class Avaliacao {
     @JoinColumn(name = "trecho_id", nullable = false)
     private Trecho trecho;
 
-    // Nulo até a Sprint 04 (autenticação); a FK para usuario é criada lá.
+    // Nulo nas avaliações anônimas feitas antes da Sprint 04; o autor passa a vir do token.
     @Column(name = "usuario_id")
     private UUID usuarioId;
 
@@ -75,6 +75,14 @@ public class Avaliacao {
 
     public UUID getId() {
         return id;
+    }
+
+    public UUID getUsuarioId() {
+        return usuarioId;
+    }
+
+    public void registrarAutor(UUID usuarioId) {
+        this.usuarioId = usuarioId;
     }
 
     public Trecho getTrecho() {

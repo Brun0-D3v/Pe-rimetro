@@ -42,7 +42,7 @@ class TrechoServiceTest {
         TrechoService service = new TrechoService(trechoRepository, regiaoRepository);
 
         TrechoResponseDto resultado = service.criar(new TrechoRequestDto(
-                "Rua das Flores", GEOMETRIA_EXEMPLO, -23.55, -46.63, regiaoId, null));
+                "Rua das Flores", GEOMETRIA_EXEMPLO, -23.55, -46.63, regiaoId, null), UUID.randomUUID());
 
         assertThat(resultado.getNome()).isEqualTo("Rua das Flores");
         assertThat(resultado.getStatus()).isEqualTo(AtivoInativo.ATIVO);
@@ -58,7 +58,7 @@ class TrechoServiceTest {
         TrechoService service = new TrechoService(trechoRepository, regiaoRepository);
 
         assertThatThrownBy(() -> service.criar(new TrechoRequestDto(
-                "Rua das Flores", GEOMETRIA_EXEMPLO, -23.55, -46.63, regiaoId, null)))
+                "Rua das Flores", GEOMETRIA_EXEMPLO, -23.55, -46.63, regiaoId, null), UUID.randomUUID()))
                 .isInstanceOf(RegiaoNaoEncontradaException.class);
     }
 

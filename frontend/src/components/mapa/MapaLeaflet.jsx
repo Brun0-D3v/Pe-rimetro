@@ -1,9 +1,11 @@
 import "leaflet/dist/leaflet.css";
 import { useEffect } from "react";
-import { MapContainer, Polyline, TileLayer, useMap } from "react-leaflet";
+import { MapContainer, Marker, Polyline, TileLayer, useMap } from "react-leaflet";
 import { corDoTrecho } from "../../config/indiceConfig";
 import { CENTRO_PADRAO, TILES_POR_TEMA, ZOOM_PADRAO } from "../../config/mapaConfig";
 import ControlesMapa from "./ControlesMapa";
+import { iconeOcorrencias } from "../../utils/iconeOcorrencias";
+import { pontoCentral } from "../../utils/pontoCentral";
 import MarcadorUsuario from "./MarcadorUsuario";
 
 function calcularCentro(trechos) {
@@ -44,6 +46,7 @@ export default function MapaLeaflet({
   trechoSelecionadoId,
   onSelecionarTrecho,
   tema,
+  contagemOcorrencias,
   focoBusca,
   posicaoUsuario,
   precisaoUsuario,
@@ -78,6 +81,21 @@ export default function MapaLeaflet({
           eventHandlers={{ click: () => onSelecionarTrecho(trecho) }}
         />
       ))}
+      {trechos.map((trecho) => {
+        const total = contagemOcorrencias?.get(trecho.id) ?? 0;
+        if (total <= 0) return null;
+        const texto = total === 1 ? "1 ocorrência neste trecho" : `${total} ocorrências neste trecho`;
+        return (
+          <Marker
+            key={`ocorrencias-${trecho.id}`}
+            position={pontoCentral(trecho.geometria)}
+            icon={iconeOcorrencias(total)}
+            title={texto}
+            alt={texto}
+            eventHandlers={{ click: () => onSelecionarTrecho(trecho) }}
+          />
+        );
+      })}
       <MarcadorUsuario posicao={posicaoUsuario} precisao={precisaoUsuario} />
       {children}
       <ControlesMapa

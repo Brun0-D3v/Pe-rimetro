@@ -5,6 +5,7 @@ import br.com.perimetro.dto.AvaliacaoResponseDto;
 import br.com.perimetro.service.AvaliacaoService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -26,7 +27,8 @@ public class AvaliacaoController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public AvaliacaoResponseDto criar(@PathVariable UUID trechoId, @Valid @RequestBody AvaliacaoRequestDto dto) {
-        return avaliacaoService.criar(trechoId, dto);
+    public AvaliacaoResponseDto criar(@PathVariable UUID trechoId, @Valid @RequestBody AvaliacaoRequestDto dto,
+                                      Authentication autenticacao) {
+        return avaliacaoService.criar(trechoId, dto, UUID.fromString(autenticacao.getName()));
     }
 }

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import Card from "../components/ui/Card";
 import MapaLeaflet from "../components/mapa/MapaLeaflet";
 import PainelDetalheTrecho from "../components/mapa/PainelDetalheTrecho";
@@ -9,8 +10,11 @@ import AvisoLocalizacao from "../components/mapa/AvisoLocalizacao";
 import CamadaDesenhoTrecho from "../components/mapa/CamadaDesenhoTrecho";
 import PainelNovoTrecho from "../components/mapa/PainelNovoTrecho";
 import { ThemeProvider, useTheme } from "../context/ThemeContext";
+import ConviteLogin from "../components/mapa/ConviteLogin";
+import { useAuth } from "../hooks/useAuth";
 import { useDesenhoTrecho } from "../hooks/useDesenhoTrecho";
 import { useLocalizacao } from "../hooks/useLocalizacao";
+import { useContagemOcorrencias } from "../hooks/useContagemOcorrencias";
 import { useTrechos } from "../hooks/useTrechos";
 import { useRegioes } from "../hooks/useRegioes";
 import { criarTrecho } from "../services/trechoService";
@@ -24,10 +28,29 @@ function MapaConteudo() {
   const [mostrarInativos, setMostrarInativos] = useState(true);
   const [busca, setBusca] = useState("");
   const [focoBusca, setFocoBusca] = useState(null);
+  // Incrementa a cada ocorrência registrada; marcadores e lista de ocorrências recarregam quando muda.
+  const [versaoOcorrencias, setVersaoOcorrencias] = useState(0);
 
   const { trechos, carregando, erro, atualizarTrecho, adicionarTrecho } = useTrechos(regiaoSelecionadaId || undefined);
   const { regioes } = useRegioes();
+  const contagemOcorrencias = useContagemOcorrencias(versaoOcorrencias);
 
+  // `/app?trecho=<id>` (ex.: "Ver no mapa" no perfil) abre o trecho assim que os trechos carregam.
+  // Ajuste de estado durante a renderização, e só uma vez, para não brigar com o usuário depois.
+  const [parametrosUrl] = useSearchParams();
+  const trechoPedidoNaUrl = parametrosUrl.get("trecho");
+  const [urlAplicada, setUrlAplicada] = useState(false);
+  if (!urlAplicada && trechoPedidoNaUrl && trechos.length > 0) {
+    setUrlAplicada(true);
+    const pedido = trechos.find((trecho) => trecho.id === trechoPedidoNaUrl);
+    if (pedido) {
+      setTrechoSelecionado(pedido);
+      setFocoBusca(pedido.geometria[0] ?? null);
+    }
+  }
+
+  const { autenticado } = useAuth();
+  const [conviteLogin, setConviteLogin] = useState(false);
   const [desenhando, setDesenhando] = useState(false);
   const [salvandoTrecho, setSalvandoTrecho] = useState(false);
   const [erroTrecho, setErroTrecho] = useState(null);
@@ -85,6 +108,11 @@ function MapaConteudo() {
   function alternarDesenho() {
     if (desenhando) {
       encerrarDesenho();
+      return;
+    }
+    if (!autenticado) {
+      setTrechoSelecionado(null);
+      setConviteLogin((aberto) => !aberto);
       return;
     }
     setTrechoSelecionado(null);
@@ -147,6 +175,7 @@ function MapaConteudo() {
         trechoSelecionadoId={trechoSelecionado?.id}
         onSelecionarTrecho={desenhando ? () => {} : setTrechoSelecionado}
         tema={tema}
+        contagemOcorrencias={contagemOcorrencias}
         focoBusca={focoBusca}
         posicaoUsuario={posicaoUsuario}
         precisaoUsuario={precisao}
@@ -190,6 +219,12 @@ function MapaConteudo() {
         className="absolute bottom-24 left-1/2 z-[1000] -translate-x-1/2"
       />
 
+      {conviteLogin && !autenticado && !desenhando && !trechoSelecionado && (
+        <Card className="absolute right-4 top-20 z-[1000] w-[calc(100%-2rem)] max-w-sm">
+          <ConviteLogin mensagem="Entre para adicionar um trecho ao mapa." aoDispensar={() => setConviteLogin(false)} />
+        </Card>
+      )}
+
       {desenhando && (
         <PainelNovoTrecho
           pontos={desenho.pontos}
@@ -212,6 +247,8 @@ function MapaConteudo() {
         trecho={desenhando ? null : trechoSelecionado}
         aoFechar={() => setTrechoSelecionado(null)}
         aoAvaliado={aoAvaliarTrecho}
+        aoReportado={() => setVersaoOcorrencias((atual) => atual + 1)}
+        versaoOcorrencias={versaoOcorrencias}
       />
     </div>
   );
