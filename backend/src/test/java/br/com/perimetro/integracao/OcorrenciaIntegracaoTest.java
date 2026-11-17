@@ -465,4 +465,17 @@ class OcorrenciaIntegracaoTest extends IntegracaoBase {
                 .andReturn().getResponse().getContentAsString();
         assertThat(depois).isEqualTo(antes);
     }
+
+    @Test
+    void adminExcluirTrechoComOcorrenciasRetorna409EMantemTudo() throws Exception {
+        Trecho trecho = novoTrecho(AtivoInativo.ATIVO);
+        UUID id = registrar(trecho, autorizacao(Perfil.CIDADAO), "x");
+
+        mockMvc.perform(delete("/api/v1/trechos/{id}", trecho.getId())
+                        .header("Authorization", autorizacao(Perfil.ADMINISTRADOR)))
+                .andExpect(status().isConflict());
+
+        assertThat(trechoRepository.findById(trecho.getId())).isPresent();
+        assertThat(ocorrenciaRepository.findById(id)).isPresent();
+    }
 }
