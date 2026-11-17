@@ -7,13 +7,14 @@ import Card from "../ui/Card";
 import { useAuth } from "../../hooks/useAuth";
 import ConviteLogin from "./ConviteLogin";
 import FormularioOcorrencia from "../ocorrencia/FormularioOcorrencia";
+import ListaOcorrenciasTrecho from "../ocorrencia/ListaOcorrenciasTrecho";
 import FormularioAvaliacao from "./FormularioAvaliacao";
 
 function textoTotal(total) {
   return total === 1 ? "1 avaliação" : `${total} avaliações`;
 }
 
-export default function PainelDetalheTrecho({ trecho, aoFechar, aoAvaliado, aoReportado }) {
+export default function PainelDetalheTrecho({ trecho, aoFechar, aoAvaliado, aoReportado, versaoOcorrencias = 0 }) {
   // Quem usa o painel passa `key={trecho.id}`: ao trocar de trecho o componente remonta,
   // e o formulário e a mensagem de sucesso não sobrevivem.
   const { autenticado } = useAuth();
@@ -131,6 +132,8 @@ export default function PainelDetalheTrecho({ trecho, aoFechar, aoAvaliado, aoRe
           {inativo && <p className="mt-2 text-xs text-texto-mute">Trechos inativos não recebem avaliações.</p>}
         </div>
       )}
+
+      <ListaOcorrenciasTrecho trechoId={trecho.id} versao={versaoOcorrencias} />
     </Card>
   );
 }

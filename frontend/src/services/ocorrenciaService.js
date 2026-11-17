@@ -17,3 +17,11 @@ export async function enviarFoto(ocorrenciaId, arquivo) {
 export function urlDaFoto(fotoId) {
   return `${import.meta.env.VITE_API_URL}/fotos/${fotoId}`;
 }
+
+export async function buscarContagemPorTrecho() {
+  return (await api.get("/ocorrencias/contagem-por-trecho")).data;
+}
+
+export async function listarDoTrecho(trechoId, { pagina = 0, tamanho = 10 } = {}) {
+  return (await api.get(`/trechos/${trechoId}/ocorrencias`, { params: { pagina, tamanho } })).data;
+}

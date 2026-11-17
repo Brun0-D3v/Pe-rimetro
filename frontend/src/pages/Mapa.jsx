@@ -14,6 +14,7 @@ import ConviteLogin from "../components/mapa/ConviteLogin";
 import { useAuth } from "../hooks/useAuth";
 import { useDesenhoTrecho } from "../hooks/useDesenhoTrecho";
 import { useLocalizacao } from "../hooks/useLocalizacao";
+import { useContagemOcorrencias } from "../hooks/useContagemOcorrencias";
 import { useTrechos } from "../hooks/useTrechos";
 import { useRegioes } from "../hooks/useRegioes";
 import { criarTrecho } from "../services/trechoService";
@@ -27,11 +28,12 @@ function MapaConteudo() {
   const [mostrarInativos, setMostrarInativos] = useState(true);
   const [busca, setBusca] = useState("");
   const [focoBusca, setFocoBusca] = useState(null);
-  // Incrementa a cada ocorrência registrada; a lista de ocorrências (próxima tarefa) a usará para recarregar.
-  const [_versaoOcorrencias, setVersaoOcorrencias] = useState(0);
+  // Incrementa a cada ocorrência registrada; marcadores e lista de ocorrências recarregam quando muda.
+  const [versaoOcorrencias, setVersaoOcorrencias] = useState(0);
 
   const { trechos, carregando, erro, atualizarTrecho, adicionarTrecho } = useTrechos(regiaoSelecionadaId || undefined);
   const { regioes } = useRegioes();
+  const contagemOcorrencias = useContagemOcorrencias(versaoOcorrencias);
 
   // `/app?trecho=<id>` (ex.: "Ver no mapa" no perfil) abre o trecho assim que os trechos carregam.
   // Ajuste de estado durante a renderização, e só uma vez, para não brigar com o usuário depois.
@@ -173,6 +175,7 @@ function MapaConteudo() {
         trechoSelecionadoId={trechoSelecionado?.id}
         onSelecionarTrecho={desenhando ? () => {} : setTrechoSelecionado}
         tema={tema}
+        contagemOcorrencias={contagemOcorrencias}
         focoBusca={focoBusca}
         posicaoUsuario={posicaoUsuario}
         precisaoUsuario={precisao}
@@ -245,6 +248,7 @@ function MapaConteudo() {
         aoFechar={() => setTrechoSelecionado(null)}
         aoAvaliado={aoAvaliarTrecho}
         aoReportado={() => setVersaoOcorrencias((atual) => atual + 1)}
+        versaoOcorrencias={versaoOcorrencias}
       />
     </div>
   );

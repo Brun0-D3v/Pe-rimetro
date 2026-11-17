@@ -1,9 +1,11 @@
+import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { useEffect } from "react";
-import { MapContainer, Polyline, TileLayer, useMap } from "react-leaflet";
+import { MapContainer, Marker, Polyline, TileLayer, useMap } from "react-leaflet";
 import { corDoTrecho } from "../../config/indiceConfig";
 import { CENTRO_PADRAO, TILES_POR_TEMA, ZOOM_PADRAO } from "../../config/mapaConfig";
 import ControlesMapa from "./ControlesMapa";
+import { pontoCentral } from "../../utils/pontoCentral";
 import MarcadorUsuario from "./MarcadorUsuario";
 
 function calcularCentro(trechos) {
@@ -25,6 +27,16 @@ function RecentralizarMapa({ centro }) {
   return null;
 }
 
+function iconeOcorrencias(total) {
+  // Estilo inline: o HTML do divIcon fica fora do alcance das classes do Tailwind.
+  return L.divIcon({
+    className: "",
+    html: `<div style="width:28px;height:28px;border-radius:9999px;background:#dc2626;color:#fff;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;font:600 13px/1 sans-serif;">${total}</div>`,
+    iconSize: [28, 28],
+    iconAnchor: [14, 14],
+  });
+}
+
 const ZOOM_LOCALIZACAO = 17;
 
 // Centraliza no usuário apenas quando `pedido` muda (clique no botão ou primeiro fix).
@@ -44,6 +56,7 @@ export default function MapaLeaflet({
   trechoSelecionadoId,
   onSelecionarTrecho,
   tema,
+  contagemOcorrencias,
   focoBusca,
   posicaoUsuario,
   precisaoUsuario,
@@ -78,6 +91,21 @@ export default function MapaLeaflet({
           eventHandlers={{ click: () => onSelecionarTrecho(trecho) }}
         />
       ))}
+      {trechos.map((trecho) => {
+        const total = contagemOcorrencias?.get(trecho.id) ?? 0;
+        if (total <= 0) return null;
+        const texto = total === 1 ? "1 ocorrência neste trecho" : `${total} ocorrências neste trecho`;
+        return (
+          <Marker
+            key={`ocorrencias-${trecho.id}`}
+            position={pontoCentral(trecho.geometria)}
+            icon={iconeOcorrencias(total)}
+            title={texto}
+            alt={texto}
+            eventHandlers={{ click: () => onSelecionarTrecho(trecho) }}
+          />
+        );
+      })}
       <MarcadorUsuario posicao={posicaoUsuario} precisao={precisaoUsuario} />
       {children}
       <ControlesMapa

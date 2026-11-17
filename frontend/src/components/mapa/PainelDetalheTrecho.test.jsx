@@ -5,6 +5,7 @@ import { useAuth } from "../../hooks/useAuth";
 import PainelDetalheTrecho from "./PainelDetalheTrecho";
 
 vi.mock("../../hooks/useAuth", () => ({ useAuth: vi.fn() }));
+vi.mock("../ocorrencia/ListaOcorrenciasTrecho", () => ({ default: () => null }));
 vi.mock("./FormularioAvaliacao", () => ({ default: () => <p>formulário de avaliação</p> }));
 vi.mock("../ocorrencia/FormularioOcorrencia", () => ({
   default: ({ aoConcluir }) => (
