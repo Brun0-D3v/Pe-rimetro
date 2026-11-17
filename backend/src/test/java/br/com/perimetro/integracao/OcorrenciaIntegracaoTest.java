@@ -323,6 +323,20 @@ class OcorrenciaIntegracaoTest extends IntegracaoBase {
     }
 
     @Test
+    void mesmoStatusNaoSobrescreveModerador() throws Exception {
+        Trecho trecho = novoTrecho(AtivoInativo.ATIVO);
+        String adminA = autorizacao(Perfil.ADMINISTRADOR);
+        String adminB = autorizacao(Perfil.ADMINISTRADOR);
+        UUID id = registrar(trecho, autorizacao(Perfil.CIDADAO), "x");
+        alterarStatus(id, adminA, "OCULTA");
+
+        alterarStatus(id, adminB, "OCULTA");
+
+        Ocorrencia salva = ocorrenciaRepository.findById(id).orElseThrow();
+        assertThat(salva.getModeradaPorId()).isEqualTo(idDoToken(adminA));
+    }
+
+    @Test
     void cidadaoNoPatchRecebe403() throws Exception {
         Trecho trecho = novoTrecho(AtivoInativo.ATIVO);
         String dono = autorizacao(Perfil.CIDADAO);

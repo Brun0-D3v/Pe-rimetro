@@ -119,8 +119,11 @@ public class OcorrenciaService {
     public OcorrenciaResponseDto alterarStatus(UUID id, StatusOcorrencia novo, UUID adminId) {
         Ocorrencia ocorrencia = ocorrenciaRepository.findById(id)
                 .orElseThrow(() -> new OcorrenciaNaoEncontradaException("Ocorrência não encontrada: " + id));
-        ocorrencia.definirStatus(novo, adminId);
-        Ocorrencia salva = ocorrenciaRepository.save(ocorrencia);
+        Ocorrencia salva = ocorrencia;
+        if (ocorrencia.getStatus() != novo) {
+            ocorrencia.definirStatus(novo, adminId);
+            salva = ocorrenciaRepository.save(ocorrencia);
+        }
         return OcorrenciaResponseDto.de(salva, fotoRepository.findByOcorrenciaId(id), nomeDoAutor(salva));
     }
 
