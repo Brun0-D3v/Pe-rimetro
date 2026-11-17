@@ -6,10 +6,10 @@ import FormularioOcorrencia from "./FormularioOcorrencia";
 vi.mock("../../services/ocorrenciaService");
 
 const categorias = [
-  { id: "c1", nome: "Calçada quebrada" },
-  { id: "c2", nome: "Falta de iluminação" },
-  { id: "c3", nome: "Sem rampa" },
-  { id: "c4", nome: "Obstáculo" },
+  { id: "1a2b3c4d-0001-4000-8000-000000000001", nome: "Calçada quebrada" },
+  { id: "1a2b3c4d-0002-4000-8000-000000000002", nome: "Falta de iluminação" },
+  { id: "1a2b3c4d-0003-4000-8000-000000000003", nome: "Sem rampa" },
+  { id: "1a2b3c4d-0004-4000-8000-000000000004", nome: "Obstáculo" },
 ];
 
 const foto = (nome, tipo = "image/png", tamanho = 1000) => {
@@ -27,7 +27,7 @@ function montar() {
 
 async function escolherCategoria() {
   await screen.findByRole("option", { name: "Sem rampa" });
-  fireEvent.change(screen.getByLabelText("Categoria"), { target: { value: "c3" } });
+  fireEvent.change(screen.getByLabelText("Categoria"), { target: { value: "1a2b3c4d-0003-4000-8000-000000000003" } });
 }
 
 function anexar(...arquivos) {
@@ -111,7 +111,7 @@ describe("FormularioOcorrencia", () => {
     enviar();
     await waitFor(() => expect(aoConcluir).toHaveBeenCalled());
     expect(criarOcorrencia).toHaveBeenCalledTimes(1);
-    expect(criarOcorrencia).toHaveBeenCalledWith("t1", { categoriaId: "c3", descricao: "" });
+    expect(criarOcorrencia).toHaveBeenCalledWith("t1", { categoriaId: "1a2b3c4d-0003-4000-8000-000000000003", descricao: "" });
     expect(enviarFoto).not.toHaveBeenCalled();
   });
 
@@ -154,7 +154,7 @@ describe("FormularioOcorrencia", () => {
     enviar();
     await screen.findByText("Trecho inativo");
     expect(screen.getByLabelText(/Descrição/).value).toBe("buraco grande");
-    expect(screen.getByLabelText("Categoria").value).toBe("c3");
+    expect(screen.getByLabelText("Categoria").value).toBe("1a2b3c4d-0003-4000-8000-000000000003");
     expect(aoConcluir).not.toHaveBeenCalled();
   });
 });

@@ -42,7 +42,7 @@ function Miniatura({ fotoId, categoria }) {
 
 function FormularioEdicao({ ocorrencia, aoSalvar, aoCancelar }) {
   const { categorias } = useCategorias();
-  const [categoriaId, setCategoriaId] = useState(String(ocorrencia.categoria.id));
+  const [categoriaId, setCategoriaId] = useState(ocorrencia.categoria.id);
   const [descricao, setDescricao] = useState(ocorrencia.descricao ?? "");
   const [salvando, setSalvando] = useState(false);
   const [erro, setErro] = useState(null);
@@ -54,9 +54,11 @@ function FormularioEdicao({ ocorrencia, aoSalvar, aoCancelar }) {
     setSalvando(true);
     setErro(null);
     try {
-      await editarOcorrencia(ocorrencia.id, { categoriaId: Number(categoriaId), descricao });
-      const categoria = categorias.find((c) => String(c.id) === categoriaId) ?? ocorrencia.categoria;
-      aoSalvar({ categoria, descricao });
+      const salva = await editarOcorrencia(ocorrencia.id, { categoriaId, descricao });
+      // O servidor normaliza a descrição (trim, vazio vira nulo): usa a resposta, não o texto digitado.
+      const categoria =
+        salva?.categoria ?? categorias.find((c) => c.id === categoriaId) ?? ocorrencia.categoria;
+      aoSalvar({ categoria, descricao: salva ? salva.descricao : descricao });
     } catch (e) {
       setErro(mensagemDeErro(e, "Não foi possível salvar a alteração. Tente novamente."));
       setSalvando(false);
@@ -75,6 +77,9 @@ function FormularioEdicao({ ocorrencia, aoSalvar, aoCancelar }) {
           onChange={(e) => setCategoriaId(e.target.value)}
           className={classeCampo}
         >
+          {!categorias.some((c) => c.id === ocorrencia.categoria.id) && (
+            <option value={ocorrencia.categoria.id}>{ocorrencia.categoria.nome}</option>
+          )}
           {categorias.map((c) => (
             <option key={c.id} value={c.id}>
               {c.nome}

@@ -5,18 +5,24 @@ import { editarOcorrencia, excluirOcorrencia } from "../../services/ocorrenciaSe
 import { buscarMinhasOcorrencias } from "../../services/usuarioService";
 import MinhasOcorrencias from "./MinhasOcorrencias";
 
+const CAT_BURACO = "3f6c2a10-8b1e-4c57-9d2a-1a2b3c4d5e61";
+const CAT_CALCADA = "7d9e4b22-5f30-4a8c-b6e1-9c8d7e6f5a42";
+
 vi.mock("../../services/usuarioService", () => ({ buscarMinhasOcorrencias: vi.fn() }));
 vi.mock("../../services/ocorrenciaService", () => ({
   editarOcorrencia: vi.fn(),
   excluirOcorrencia: vi.fn(),
   listarCategorias: vi.fn(),
 }));
+const mockCategorias = vi.hoisted(() => ({
+  lista: [
+    { id: "3f6c2a10-8b1e-4c57-9d2a-1a2b3c4d5e61", nome: "Buraco" },
+    { id: "7d9e4b22-5f30-4a8c-b6e1-9c8d7e6f5a42", nome: "Calçada quebrada" },
+  ],
+}));
 vi.mock("../../hooks/useCategorias", () => ({
   useCategorias: () => ({
-    categorias: [
-      { id: 1, nome: "Buraco" },
-      { id: 2, nome: "Calçada quebrada" },
-    ],
+    categorias: mockCategorias.lista,
     carregando: false,
     erro: null,
   }),
@@ -29,7 +35,7 @@ const visivel = {
   id: "o1",
   trechoId: "t1",
   trechoNome: "Rua da Aurora",
-  categoria: { id: 1, nome: "Buraco" },
+  categoria: { id: CAT_BURACO, nome: "Buraco" },
   descricao: "Buraco grande",
   status: "VISIVEL",
   fotos: [{ id: "f1" }],
@@ -50,7 +56,13 @@ function montar() {
 }
 
 describe("MinhasOcorrencias", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockCategorias.lista = [
+      { id: CAT_BURACO, nome: "Buraco" },
+      { id: CAT_CALCADA, nome: "Calçada quebrada" },
+    ];
+  });
   afterEach(cleanup);
 
   it("lista com categoria, miniatura, data e selo de visibilidade", async () => {
@@ -137,21 +149,49 @@ describe("MinhasOcorrencias", () => {
 
   it("editar abre categoria e descrição preenchidas; salvar chama PUT", async () => {
     buscarMinhasOcorrencias.mockResolvedValue(respostaCom([visivel]));
-    editarOcorrencia.mockResolvedValue({});
+    editarOcorrencia.mockResolvedValue({
+      ...visivel,
+      categoria: { id: CAT_CALCADA, nome: "Calçada quebrada" },
+      descricao: "Calçada destruída",
+    });
     montar();
     await screen.findByText("Rua da Aurora");
 
     fireEvent.click(screen.getByRole("button", { name: "Editar" }));
-    expect(screen.getByLabelText("Categoria").value).toBe("1");
+    expect(screen.getByLabelText("Categoria").value).toBe(CAT_BURACO);
     expect(screen.getByLabelText("Descrição").value).toBe("Buraco grande");
 
-    fireEvent.change(screen.getByLabelText("Categoria"), { target: { value: "2" } });
+    fireEvent.change(screen.getByLabelText("Categoria"), { target: { value: CAT_CALCADA } });
     fireEvent.change(screen.getByLabelText("Descrição"), { target: { value: "Calçada destruída" } });
     fireEvent.click(screen.getByRole("button", { name: "Salvar" }));
 
     await waitFor(() =>
-      expect(editarOcorrencia).toHaveBeenCalledWith("o1", { categoriaId: 2, descricao: "Calçada destruída" })
+      expect(editarOcorrencia).toHaveBeenCalledWith("o1", { categoriaId: CAT_CALCADA, descricao: "Calçada destruída" })
     );
     expect(await screen.findByText("Calçada quebrada")).toBeTruthy();
+  });
+
+  it("após salvar mostra a descrição normalizada devolvida pelo servidor", async () => {
+    buscarMinhasOcorrencias.mockResolvedValue(respostaCom([visivel]));
+    editarOcorrencia.mockResolvedValue({ ...visivel, descricao: "Texto normalizado" });
+    montar();
+    await screen.findByText("Rua da Aurora");
+
+    fireEvent.click(screen.getByRole("button", { name: "Editar" }));
+    fireEvent.change(screen.getByLabelText("Descrição"), { target: { value: "  Texto normalizado  " } });
+    fireEvent.click(screen.getByRole("button", { name: "Salvar" }));
+
+    expect(await screen.findByText("Texto normalizado")).toBeTruthy();
+  });
+
+  it("enquanto as categorias carregam, mantém a categoria atual como opção do select", async () => {
+    mockCategorias.lista = [];
+    buscarMinhasOcorrencias.mockResolvedValue(respostaCom([visivel]));
+    montar();
+    await screen.findByText("Rua da Aurora");
+    fireEvent.click(screen.getByRole("button", { name: "Editar" }));
+    const select = screen.getByLabelText("Categoria");
+    expect(select.value).toBe(CAT_BURACO);
+    expect(select.options).toHaveLength(1);
   });
 });

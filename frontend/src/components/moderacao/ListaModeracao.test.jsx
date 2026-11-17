@@ -15,7 +15,7 @@ const visivel = {
   id: "o1",
   trechoId: "t1",
   trechoNome: "Rua da Aurora",
-  categoria: { id: 1, nome: "Buraco" },
+  categoria: { id: "3f6c2a10-8b1e-4c57-9d2a-1a2b3c4d5e61", nome: "Buraco" },
   descricao: "Buraco grande",
   status: "VISIVEL",
   fotos: [{ id: "f1" }],

@@ -10,7 +10,7 @@ const ocorrencia = {
   id: "o1",
   trechoId: "t1",
   trechoNome: "Rua da Aurora",
-  categoria: { id: "c1", nome: "Calçada quebrada" },
+  categoria: { id: "1a2b3c4d-0001-4000-8000-000000000001", nome: "Calçada quebrada" },
   descricao: "Buraco grande perto do poste",
   status: "ABERTA",
   fotos: [{ id: "f1" }, { id: "f2" }],
