@@ -6,6 +6,15 @@ import PainelDetalheTrecho from "./PainelDetalheTrecho";
 
 vi.mock("../../hooks/useAuth", () => ({ useAuth: vi.fn() }));
 vi.mock("./FormularioAvaliacao", () => ({ default: () => <p>formulário de avaliação</p> }));
+vi.mock("../ocorrencia/FormularioOcorrencia", () => ({
+  default: ({ aoConcluir }) => (
+    <div>
+      <p>formulário de ocorrência</p>
+      <button onClick={() => aoConcluir({ id: "o1" }, { fotosPendentes: 0 })}>concluir</button>
+      <button onClick={() => aoConcluir({ id: "o1" }, { fotosPendentes: 1 })}>concluir com pendência</button>
+    </div>
+  ),
+}));
 
 const trecho = {
   id: "t1",
@@ -16,11 +25,11 @@ const trecho = {
   totalAvaliacoes: 0,
 };
 
-function montar(auth, trechoExibido = trecho) {
+function montar(auth, trechoExibido = trecho, aoReportado = () => {}) {
   useAuth.mockReturnValue(auth);
   const criarElemento = () => (
     <MemoryRouter>
-      <PainelDetalheTrecho trecho={trechoExibido} aoFechar={() => {}} aoAvaliado={() => {}} />
+      <PainelDetalheTrecho trecho={trechoExibido} aoFechar={() => {}} aoAvaliado={() => {}} aoReportado={aoReportado} />
     </MemoryRouter>
   );
   const resultado = render(criarElemento());
@@ -66,5 +75,44 @@ describe("PainelDetalheTrecho e o login", () => {
 
     expect(screen.queryByText("formulário de avaliação")).toBeNull();
     expect(screen.getByText("Entre para avaliar este trecho.")).toBeTruthy();
+  });
+
+  it("sem login convida a entrar para reportar problema", () => {
+    montar({ autenticado: false });
+
+    expect(screen.getByText("Entre para reportar um problema.")).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "Reportar problema" })).toBeNull();
+  });
+
+  it("logado abre o formulário de ocorrência e ao concluir confirma e avisa o mapa", () => {
+    const aoReportado = vi.fn();
+    montar({ autenticado: true }, trecho, aoReportado);
+
+    fireEvent.click(screen.getByRole("button", { name: "Reportar problema" }));
+    expect(screen.getByText("formulário de ocorrência")).toBeTruthy();
+    expect(screen.queryByText("formulário de avaliação")).toBeNull();
+
+    fireEvent.click(screen.getByRole("button", { name: "concluir" }));
+    expect(aoReportado).toHaveBeenCalledTimes(1);
+    expect(screen.getByText("Ocorrência registrada. Obrigado!")).toBeTruthy();
+    expect(screen.queryByText("formulário de ocorrência")).toBeNull();
+  });
+
+  it("com foto pendente o formulário continua aberto", () => {
+    const aoReportado = vi.fn();
+    montar({ autenticado: true }, trecho, aoReportado);
+
+    fireEvent.click(screen.getByRole("button", { name: "Reportar problema" }));
+    fireEvent.click(screen.getByRole("button", { name: "concluir com pendência" }));
+
+    expect(aoReportado).toHaveBeenCalledTimes(1);
+    expect(screen.getByText("formulário de ocorrência")).toBeTruthy();
+    expect(screen.queryByText("Ocorrência registrada. Obrigado!")).toBeNull();
+  });
+
+  it("trecho inativo desabilita reportar problema", () => {
+    montar({ autenticado: true }, { ...trecho, status: "INATIVO" });
+
+    expect(screen.getByRole("button", { name: "Reportar problema" }).disabled).toBe(true);
   });
 });

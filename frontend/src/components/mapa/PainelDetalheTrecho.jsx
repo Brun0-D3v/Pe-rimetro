@@ -6,18 +6,21 @@ import Button from "../ui/Button";
 import Card from "../ui/Card";
 import { useAuth } from "../../hooks/useAuth";
 import ConviteLogin from "./ConviteLogin";
+import FormularioOcorrencia from "../ocorrencia/FormularioOcorrencia";
 import FormularioAvaliacao from "./FormularioAvaliacao";
 
 function textoTotal(total) {
   return total === 1 ? "1 avaliação" : `${total} avaliações`;
 }
 
-export default function PainelDetalheTrecho({ trecho, aoFechar, aoAvaliado }) {
+export default function PainelDetalheTrecho({ trecho, aoFechar, aoAvaliado, aoReportado }) {
   // Quem usa o painel passa `key={trecho.id}`: ao trocar de trecho o componente remonta,
   // e o formulário e a mensagem de sucesso não sobrevivem.
   const { autenticado } = useAuth();
   const [avaliando, setAvaliando] = useState(false);
+  const [reportando, setReportando] = useState(false);
   const [confirmacao, setConfirmacao] = useState(false);
+  const [confirmacaoOcorrencia, setConfirmacaoOcorrencia] = useState(false);
 
   if (!trecho) return null;
 
@@ -28,6 +31,15 @@ export default function PainelDetalheTrecho({ trecho, aoFechar, aoAvaliado }) {
     aoAvaliado(trechoAtualizado);
     setAvaliando(false);
     setConfirmacao(true);
+  }
+
+  function concluirOcorrencia(ocorrencia, { fotosPendentes = 0 } = {}) {
+    aoReportado?.(ocorrencia);
+    // Com foto pendente o formulário continua aberto para "Tentar de novo".
+    if (fotosPendentes === 0) {
+      setReportando(false);
+      setConfirmacaoOcorrencia(true);
+    }
   }
 
   return (
@@ -61,14 +73,29 @@ export default function PainelDetalheTrecho({ trecho, aoFechar, aoAvaliado }) {
         </p>
       )}
 
+      {confirmacaoOcorrencia && (
+        <p role="status" className="mt-3 text-sm text-texto">
+          Ocorrência registrada. Obrigado!
+        </p>
+      )}
+
       {!autenticado ? (
-        <div className="mt-4">
+        <div className="mt-4 flex flex-col gap-2">
           {inativo ? (
             <p className="text-xs text-texto-mute">Trechos inativos não recebem avaliações.</p>
           ) : (
-            <ConviteLogin mensagem="Entre para avaliar este trecho." />
+            <>
+              <ConviteLogin mensagem="Entre para avaliar este trecho." />
+              <p className="text-sm text-texto">Entre para reportar um problema.</p>
+            </>
           )}
         </div>
+      ) : reportando ? (
+        <FormularioOcorrencia
+          trechoId={trecho.id}
+          aoConcluir={concluirOcorrencia}
+          aoCancelar={() => setReportando(false)}
+        />
       ) : avaliando ? (
         <FormularioAvaliacao
           trechoId={trecho.id}
@@ -77,15 +104,30 @@ export default function PainelDetalheTrecho({ trecho, aoFechar, aoAvaliado }) {
         />
       ) : (
         <div className="mt-4">
-          <Button
-            disabled={inativo}
-            onClick={() => {
-              setConfirmacao(false);
-              setAvaliando(true);
-            }}
-          >
-            Avaliar este trecho
-          </Button>
+          <div className="flex flex-wrap gap-2">
+            <Button
+              disabled={inativo}
+              onClick={() => {
+                setConfirmacao(false);
+                setConfirmacaoOcorrencia(false);
+                setAvaliando(true);
+              }}
+            >
+              Avaliar este trecho
+            </Button>
+            <Button
+              variante="secundario"
+              disabled={inativo}
+              onClick={() => {
+                setConfirmacao(false);
+                setConfirmacaoOcorrencia(false);
+                setAvaliando(false);
+                setReportando(true);
+              }}
+            >
+              Reportar problema
+            </Button>
+          </div>
           {inativo && <p className="mt-2 text-xs text-texto-mute">Trechos inativos não recebem avaliações.</p>}
         </div>
       )}

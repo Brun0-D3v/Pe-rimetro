@@ -27,6 +27,8 @@ function MapaConteudo() {
   const [mostrarInativos, setMostrarInativos] = useState(true);
   const [busca, setBusca] = useState("");
   const [focoBusca, setFocoBusca] = useState(null);
+  // Incrementa a cada ocorrência registrada; a lista de ocorrências (próxima tarefa) a usará para recarregar.
+  const [_versaoOcorrencias, setVersaoOcorrencias] = useState(0);
 
   const { trechos, carregando, erro, atualizarTrecho, adicionarTrecho } = useTrechos(regiaoSelecionadaId || undefined);
   const { regioes } = useRegioes();
@@ -242,6 +244,7 @@ function MapaConteudo() {
         trecho={desenhando ? null : trechoSelecionado}
         aoFechar={() => setTrechoSelecionado(null)}
         aoAvaliado={aoAvaliarTrecho}
+        aoReportado={() => setVersaoOcorrencias((atual) => atual + 1)}
       />
     </div>
   );
