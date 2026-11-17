@@ -44,7 +44,7 @@ public class FotoController {
         UUID usuarioId = jwt == null ? null : UUID.fromString(jwt.getSubject());
         FotoCarregada foto = fotoService.carregar(id, usuarioId, ehAdmin(jwt));
         CacheControl cache = foto.ocorrenciaVisivel()
-                ? CacheControl.maxAge(Duration.ofHours(1)).cachePublic()
+                ? CacheControl.maxAge(Duration.ofMinutes(5)).cachePrivate()
                 : CacheControl.noStore();
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(foto.tipoConteudo()))

@@ -220,13 +220,16 @@ class FotoIntegracaoTest extends IntegracaoBase {
     }
 
     @Test
-    void fotoDeOcorrenciaVisivelEPublica() throws Exception {
+    void fotoDeOcorrenciaVisivelTemCachePrivadoDe5Minutos() throws Exception {
         String dono = autorizacao(Perfil.CIDADAO);
         String fotoId = enviarFoto(criarOcorrencia(dono), dono, PNG);
 
         mockMvc.perform(get("/api/v1/fotos/{id}", fotoId))
                 .andExpect(status().isOk())
-                .andExpect(header().string("Cache-Control", "max-age=3600, public"));
+                .andExpect(header().string("Cache-Control", org.hamcrest.Matchers.allOf(
+                        org.hamcrest.Matchers.containsString("private"),
+                        org.hamcrest.Matchers.containsString("max-age=300"),
+                        org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("public")))));
     }
 
     @Test
