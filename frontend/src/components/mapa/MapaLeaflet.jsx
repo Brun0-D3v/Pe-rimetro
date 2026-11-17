@@ -1,10 +1,10 @@
-import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { useEffect } from "react";
 import { MapContainer, Marker, Polyline, TileLayer, useMap } from "react-leaflet";
 import { corDoTrecho } from "../../config/indiceConfig";
 import { CENTRO_PADRAO, TILES_POR_TEMA, ZOOM_PADRAO } from "../../config/mapaConfig";
 import ControlesMapa from "./ControlesMapa";
+import { iconeOcorrencias } from "../../utils/iconeOcorrencias";
 import { pontoCentral } from "../../utils/pontoCentral";
 import MarcadorUsuario from "./MarcadorUsuario";
 
@@ -25,16 +25,6 @@ function RecentralizarMapa({ centro }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [centro[0], centro[1], mapa]);
   return null;
-}
-
-function iconeOcorrencias(total) {
-  // Estilo inline: o HTML do divIcon fica fora do alcance das classes do Tailwind.
-  return L.divIcon({
-    className: "",
-    html: `<div style="width:28px;height:28px;border-radius:9999px;background:#dc2626;color:#fff;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;font:600 13px/1 sans-serif;">${total}</div>`,
-    iconSize: [28, 28],
-    iconAnchor: [14, 14],
-  });
 }
 
 const ZOOM_LOCALIZACAO = 17;
