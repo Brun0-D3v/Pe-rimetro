@@ -11,6 +11,11 @@ export default function AtalhosAdmin() {
             Dashboard
           </Link>
         </li>
+        <li>
+          <Link to="/app/moderacao" className="font-medium text-primary-light hover:underline">
+            Fila de moderação
+          </Link>
+        </li>
       </ul>
     </Card>
   );

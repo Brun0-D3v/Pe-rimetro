@@ -1,5 +1,5 @@
 import { Link, NavLink } from "react-router-dom";
-import { AlertTriangle, ClipboardCheck, Home, LayoutDashboard, LogIn, LogOut, Map, User } from "lucide-react";
+import { AlertTriangle, ClipboardCheck, Home, LayoutDashboard, LogIn, LogOut, Map, ShieldCheck, User } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 
 const links = [
@@ -19,7 +19,7 @@ function itemClasse({ isActive }) {
 }
 
 export default function AppNavbar() {
-  const { autenticado, usuario, sair } = useAuth();
+  const { autenticado, ehAdmin, usuario, sair } = useAuth();
   const primeiroNome = usuario?.nome?.split(" ")[0];
 
   return (
@@ -42,6 +42,13 @@ export default function AppNavbar() {
             <span className="hidden md:inline">{label}</span>
           </NavLink>
         ))}
+
+        {ehAdmin && (
+          <NavLink to="/app/moderacao" className={itemClasse} title="Moderação">
+            <ShieldCheck size={18} className="shrink-0" />
+            <span className="hidden md:inline">Moderação</span>
+          </NavLink>
+        )}
 
         <span className="mx-1 h-5 w-px bg-base-4" aria-hidden="true" />
 

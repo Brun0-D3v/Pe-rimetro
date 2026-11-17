@@ -33,3 +33,14 @@ export async function editarOcorrencia(id, { categoriaId, descricao }) {
 export async function excluirOcorrencia(id) {
   await api.delete(`/ocorrencias/${id}`);
 }
+
+export async function listarParaModeracao({ status, moderadasPorMim, pagina = 0, tamanho = 20 } = {}) {
+  const params = { pagina, tamanho };
+  if (status) params.status = status;
+  if (moderadasPorMim) params.moderadasPorMim = true;
+  return (await api.get("/ocorrencias", { params })).data;
+}
+
+export async function alterarVisibilidade(id, status) {
+  return (await api.patch(`/ocorrencias/${id}`, { status })).data;
+}

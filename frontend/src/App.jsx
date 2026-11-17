@@ -7,6 +7,7 @@ import Mapa from "./pages/Mapa";
 import Ocorrencia from "./pages/Ocorrencia";
 import Login from "./pages/Login";
 import Cadastro from "./pages/Cadastro";
+import Moderacao from "./pages/Moderacao";
 import Perfil from "./pages/Perfil";
 import RotaProtegida from "./components/RotaProtegida";
 
@@ -26,6 +27,9 @@ export default function App() {
           <Route path="cadastrar" element={<Cadastro />} />
           <Route element={<RotaProtegida />}>
             <Route path="app/perfil" element={<Perfil />} />
+            <Route element={<RotaProtegida apenasAdmin />}>
+              <Route path="app/moderacao" element={<Moderacao />} />
+            </Route>
           </Route>
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
