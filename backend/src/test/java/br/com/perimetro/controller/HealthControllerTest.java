@@ -1,5 +1,7 @@
 package br.com.perimetro.controller;
 
+import br.com.perimetro.config.SegurancaConfig;
+import org.springframework.context.annotation.Import;
 import br.com.perimetro.dto.HealthResponseDto;
 import br.com.perimetro.service.HealthService;
 import org.junit.jupiter.api.Test;
@@ -16,6 +18,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(HealthController.class)
+@Import(SegurancaConfig.class)
 class HealthControllerTest {
 
     @Autowired

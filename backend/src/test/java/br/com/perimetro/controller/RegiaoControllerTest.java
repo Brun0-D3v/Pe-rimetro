@@ -1,5 +1,7 @@
 package br.com.perimetro.controller;
 
+import br.com.perimetro.config.SegurancaConfig;
+import org.springframework.context.annotation.Import;
 import br.com.perimetro.dto.RegiaoRequestDto;
 import br.com.perimetro.dto.RegiaoResponseDto;
 import br.com.perimetro.exception.RegiaoNaoEncontradaException;
@@ -15,6 +17,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 import java.util.UUID;
 
+import static br.com.perimetro.JwtTestes.admin;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -24,6 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(RegiaoController.class)
+@Import(SegurancaConfig.class)
 class RegiaoControllerTest {
 
     @Autowired
@@ -50,7 +54,7 @@ class RegiaoControllerTest {
         UUID id = UUID.randomUUID();
         when(regiaoService.criar(any())).thenReturn(new RegiaoResponseDto(id, "Centro"));
 
-        mockMvc.perform(post("/api/v1/regioes")
+        mockMvc.perform(post("/api/v1/regioes").with(admin())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new RegiaoRequestDto("Centro"))))
                 .andExpect(status().isCreated())
@@ -59,7 +63,7 @@ class RegiaoControllerTest {
 
     @Test
     void rejeitaRegiaoComNomeEmBranco() throws Exception {
-        mockMvc.perform(post("/api/v1/regioes")
+        mockMvc.perform(post("/api/v1/regioes").with(admin())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(new RegiaoRequestDto(""))))
                 .andExpect(status().isBadRequest());
@@ -78,7 +82,7 @@ class RegiaoControllerTest {
     void removeRegiaoExistente() throws Exception {
         UUID id = UUID.randomUUID();
 
-        mockMvc.perform(delete("/api/v1/regioes/{id}", id))
+        mockMvc.perform(delete("/api/v1/regioes/{id}", id).with(admin()))
                 .andExpect(status().isNoContent());
     }
 }

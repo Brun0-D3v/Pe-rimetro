@@ -1,5 +1,7 @@
 package br.com.perimetro.controller;
 
+import br.com.perimetro.config.SegurancaConfig;
+import org.springframework.context.annotation.Import;
 import br.com.perimetro.dto.PontoDto;
 import br.com.perimetro.dto.TrechoRequestDto;
 import br.com.perimetro.dto.TrechoResponseDto;
@@ -18,6 +20,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 import java.util.UUID;
 
+import static br.com.perimetro.JwtTestes.admin;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
@@ -27,6 +30,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(TrechoController.class)
+@Import(SegurancaConfig.class)
 class TrechoControllerTest {
 
     private static final List<PontoDto> GEOMETRIA_EXEMPLO = List.of(
@@ -69,11 +73,11 @@ class TrechoControllerTest {
     void criaTrechoComDadosValidos() throws Exception {
         UUID id = UUID.randomUUID();
         UUID regiaoId = UUID.randomUUID();
-        when(trechoService.criar(any())).thenReturn(
+        when(trechoService.criar(any(), any(UUID.class))).thenReturn(
                 new TrechoResponseDto(id, "Rua das Flores", GEOMETRIA_EXEMPLO, -23.55, -46.63, null, AtivoInativo.ATIVO, regiaoId, 0, null));
         TrechoRequestDto corpo = new TrechoRequestDto("Rua das Flores", GEOMETRIA_EXEMPLO, -23.55, -46.63, regiaoId, null);
 
-        mockMvc.perform(post("/api/v1/trechos")
+        mockMvc.perform(post("/api/v1/trechos").with(admin())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(corpo)))
                 .andExpect(status().isCreated())
@@ -86,7 +90,7 @@ class TrechoControllerTest {
         UUID regiaoId = UUID.randomUUID();
         TrechoRequestDto corpo = new TrechoRequestDto("", GEOMETRIA_EXEMPLO, -23.55, -46.63, regiaoId, null);
 
-        mockMvc.perform(post("/api/v1/trechos")
+        mockMvc.perform(post("/api/v1/trechos").with(admin())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(corpo)))
                 .andExpect(status().isBadRequest());
@@ -98,7 +102,7 @@ class TrechoControllerTest {
         TrechoRequestDto corpo = new TrechoRequestDto("Rua das Flores",
                 List.of(new PontoDto(-23.550520, -46.633308)), -23.55, -46.63, regiaoId, null);
 
-        mockMvc.perform(post("/api/v1/trechos")
+        mockMvc.perform(post("/api/v1/trechos").with(admin())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(corpo)))
                 .andExpect(status().isBadRequest())
@@ -108,10 +112,10 @@ class TrechoControllerTest {
     @Test
     void retorna404QuandoRegiaoDoTrechoNaoExiste() throws Exception {
         UUID regiaoId = UUID.randomUUID();
-        when(trechoService.criar(any())).thenThrow(new RegiaoNaoEncontradaException("Região não encontrada: " + regiaoId));
+        when(trechoService.criar(any(), any(UUID.class))).thenThrow(new RegiaoNaoEncontradaException("Região não encontrada: " + regiaoId));
         TrechoRequestDto corpo = new TrechoRequestDto("Rua das Flores", GEOMETRIA_EXEMPLO, -23.55, -46.63, regiaoId, null);
 
-        mockMvc.perform(post("/api/v1/trechos")
+        mockMvc.perform(post("/api/v1/trechos").with(admin())
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(corpo)))
                 .andExpect(status().isNotFound());
@@ -130,7 +134,7 @@ class TrechoControllerTest {
     void removeTrechoExistente() throws Exception {
         UUID id = UUID.randomUUID();
 
-        mockMvc.perform(delete("/api/v1/trechos/{id}", id))
+        mockMvc.perform(delete("/api/v1/trechos/{id}", id).with(admin()))
                 .andExpect(status().isNoContent());
     }
 }

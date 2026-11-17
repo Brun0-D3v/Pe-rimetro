@@ -1,5 +1,7 @@
 package br.com.perimetro.controller;
 
+import br.com.perimetro.config.SegurancaConfig;
+import org.springframework.context.annotation.Import;
 import br.com.perimetro.dto.AvaliacaoRequestDto;
 import br.com.perimetro.dto.AvaliacaoResponseDto;
 import br.com.perimetro.dto.PontoDto;
@@ -24,6 +26,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
+import static br.com.perimetro.JwtTestes.cidadao;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -32,6 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(AvaliacaoController.class)
+@Import(SegurancaConfig.class)
 class AvaliacaoControllerTest {
 
     private static final String URL = "/api/v1/trechos/{trechoId}/avaliacoes";
@@ -60,10 +64,10 @@ class AvaliacaoControllerTest {
         TrechoResponseDto trechoDto = new TrechoResponseDto(trechoId, "Rua da Aurora",
                 List.of(new PontoDto(-8.06, -34.87)), -8.06, -34.87, new BigDecimal("5.00"),
                 AtivoInativo.ATIVO, UUID.randomUUID(), 1, Classificacao.MEDIO);
-        when(avaliacaoService.criar(eq(trechoId), any(AvaliacaoRequestDto.class)))
+        when(avaliacaoService.criar(eq(trechoId), any(AvaliacaoRequestDto.class), any(UUID.class)))
                 .thenReturn(new AvaliacaoResponseDto(avaliacao, trechoDto));
 
-        mockMvc.perform(post(URL, trechoId).contentType(MediaType.APPLICATION_JSON).content(json(5)))
+        mockMvc.perform(post(URL, trechoId).with(cidadao()).contentType(MediaType.APPLICATION_JSON).content(json(5)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.notaCalcada").value(5))
                 .andExpect(jsonPath("$.trecho.indiceAtual").value(5.00))
@@ -73,13 +77,13 @@ class AvaliacaoControllerTest {
 
     @Test
     void rejeitaNotaMaiorQueDez() throws Exception {
-        mockMvc.perform(post(URL, UUID.randomUUID()).contentType(MediaType.APPLICATION_JSON).content(json(11)))
+        mockMvc.perform(post(URL, UUID.randomUUID()).with(cidadao()).contentType(MediaType.APPLICATION_JSON).content(json(11)))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
     void rejeitaNotaNegativa() throws Exception {
-        mockMvc.perform(post(URL, UUID.randomUUID()).contentType(MediaType.APPLICATION_JSON).content(json(-1)))
+        mockMvc.perform(post(URL, UUID.randomUUID()).with(cidadao()).contentType(MediaType.APPLICATION_JSON).content(json(-1)))
                 .andExpect(status().isBadRequest());
     }
 
@@ -88,33 +92,33 @@ class AvaliacaoControllerTest {
         String semNota = "{\"notaAcessibilidade\":5,\"notaIluminacao\":5,\"notaArborizacao\":5"
                 + ",\"notaTravessias\":5,\"notaMobiliario\":5}";
 
-        mockMvc.perform(post(URL, UUID.randomUUID()).contentType(MediaType.APPLICATION_JSON).content(semNota))
+        mockMvc.perform(post(URL, UUID.randomUUID()).with(cidadao()).contentType(MediaType.APPLICATION_JSON).content(semNota))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
     void rejeitaNotaNaoInteira() throws Exception {
-        mockMvc.perform(post(URL, UUID.randomUUID()).contentType(MediaType.APPLICATION_JSON).content(json("7.5")))
+        mockMvc.perform(post(URL, UUID.randomUUID()).with(cidadao()).contentType(MediaType.APPLICATION_JSON).content(json("7.5")))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
     void retorna404QuandoOTrechoNaoExiste() throws Exception {
         UUID trechoId = UUID.randomUUID();
-        when(avaliacaoService.criar(eq(trechoId), any(AvaliacaoRequestDto.class)))
+        when(avaliacaoService.criar(eq(trechoId), any(AvaliacaoRequestDto.class), any(UUID.class)))
                 .thenThrow(new TrechoNaoEncontradoException("Trecho não encontrado: " + trechoId));
 
-        mockMvc.perform(post(URL, trechoId).contentType(MediaType.APPLICATION_JSON).content(json(5)))
+        mockMvc.perform(post(URL, trechoId).with(cidadao()).contentType(MediaType.APPLICATION_JSON).content(json(5)))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     void retorna409QuandoOTrechoEstaInativo() throws Exception {
         UUID trechoId = UUID.randomUUID();
-        when(avaliacaoService.criar(eq(trechoId), any(AvaliacaoRequestDto.class)))
+        when(avaliacaoService.criar(eq(trechoId), any(AvaliacaoRequestDto.class), any(UUID.class)))
                 .thenThrow(new TrechoInativoException("Trecho inativo não pode ser avaliado: " + trechoId));
 
-        mockMvc.perform(post(URL, trechoId).contentType(MediaType.APPLICATION_JSON).content(json(5)))
+        mockMvc.perform(post(URL, trechoId).with(cidadao()).contentType(MediaType.APPLICATION_JSON).content(json(5)))
                 .andExpect(status().isConflict());
     }
 }

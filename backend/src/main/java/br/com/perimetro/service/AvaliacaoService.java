@@ -29,21 +29,23 @@ public class AvaliacaoService {
     }
 
     @Transactional
-    public AvaliacaoResponseDto criar(UUID trechoId, AvaliacaoRequestDto dto) {
+    public AvaliacaoResponseDto criar(UUID trechoId, AvaliacaoRequestDto dto, UUID usuarioId) {
         Trecho trecho = trechoRepository.buscarParaAtualizacao(trechoId)
                 .orElseThrow(() -> new TrechoNaoEncontradoException("Trecho não encontrado: " + trechoId));
         if (trecho.getStatus() == AtivoInativo.INATIVO) {
             throw new TrechoInativoException("Trecho inativo não pode ser avaliado: " + trechoId);
         }
 
-        Avaliacao avaliacao = avaliacaoRepository.save(new Avaliacao(
+        Avaliacao nova = new Avaliacao(
                 trecho,
                 dto.getNotaCalcada(),
                 dto.getNotaAcessibilidade(),
                 dto.getNotaIluminacao(),
                 dto.getNotaArborizacao(),
                 dto.getNotaTravessias(),
-                dto.getNotaMobiliario()));
+                dto.getNotaMobiliario());
+        nova.registrarAutor(usuarioId);
+        Avaliacao avaliacao = avaliacaoRepository.save(nova);
 
         // Recalcula a partir de todas as avaliações (idempotente), com o trecho travado.
         MediasPorDimensao medias = avaliacaoRepository.mediasPorDimensao(trechoId);

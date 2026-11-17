@@ -40,10 +40,11 @@ public class TrechoService {
     }
 
     @Transactional
-    public TrechoResponseDto criar(TrechoRequestDto dto) {
+    public TrechoResponseDto criar(TrechoRequestDto dto, UUID usuarioId) {
         Regiao regiao = buscarRegiao(dto.getRegiaoId());
         AtivoInativo status = dto.getStatus() != null ? dto.getStatus() : AtivoInativo.ATIVO;
         Trecho trecho = new Trecho(dto.getNome(), dto.getGeometria(), dto.getLatitude(), dto.getLongitude(), status, regiao);
+        trecho.registrarAutor(usuarioId);
         return paraDto(trechoRepository.save(trecho));
     }
 
