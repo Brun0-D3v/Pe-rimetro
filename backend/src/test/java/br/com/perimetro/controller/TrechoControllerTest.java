@@ -48,7 +48,7 @@ class TrechoControllerTest {
         UUID id = UUID.randomUUID();
         UUID regiaoId = UUID.randomUUID();
         when(trechoService.listar(null)).thenReturn(List.of(
-                new TrechoResponseDto(id, "Rua das Flores", GEOMETRIA_EXEMPLO, -23.55, -46.63, null, AtivoInativo.ATIVO, regiaoId)));
+                new TrechoResponseDto(id, "Rua das Flores", GEOMETRIA_EXEMPLO, -23.55, -46.63, null, AtivoInativo.ATIVO, regiaoId, 0, null)));
 
         mockMvc.perform(get("/api/v1/trechos"))
                 .andExpect(status().isOk())
@@ -70,7 +70,7 @@ class TrechoControllerTest {
         UUID id = UUID.randomUUID();
         UUID regiaoId = UUID.randomUUID();
         when(trechoService.criar(any())).thenReturn(
-                new TrechoResponseDto(id, "Rua das Flores", GEOMETRIA_EXEMPLO, -23.55, -46.63, null, AtivoInativo.ATIVO, regiaoId));
+                new TrechoResponseDto(id, "Rua das Flores", GEOMETRIA_EXEMPLO, -23.55, -46.63, null, AtivoInativo.ATIVO, regiaoId, 0, null));
         TrechoRequestDto corpo = new TrechoRequestDto("Rua das Flores", GEOMETRIA_EXEMPLO, -23.55, -46.63, regiaoId, null);
 
         mockMvc.perform(post("/api/v1/trechos")
@@ -90,6 +90,19 @@ class TrechoControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(corpo)))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void rejeitaGeometriaComUmUnicoPonto() throws Exception {
+        UUID regiaoId = UUID.randomUUID();
+        TrechoRequestDto corpo = new TrechoRequestDto("Rua das Flores",
+                List.of(new PontoDto(-23.550520, -46.633308)), -23.55, -46.63, regiaoId, null);
+
+        mockMvc.perform(post("/api/v1/trechos")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(corpo)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.mensagem").value(org.hamcrest.Matchers.containsString("geometria: deve ter entre 2 e 200 pontos")));
     }
 
     @Test

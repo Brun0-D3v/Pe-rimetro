@@ -1,7 +1,15 @@
-import { Search } from "lucide-react";
+import { Route, Search } from "lucide-react";
 import ThemeToggle from "../ThemeToggle";
+import Button from "../ui/Button";
 
-export default function CabecalhoMapa({ busca, aoMudarBusca, sugestoes, aoSelecionarSugestao }) {
+export default function CabecalhoMapa({
+  busca,
+  aoMudarBusca,
+  sugestoes,
+  aoSelecionarSugestao,
+  desenhando,
+  aoAlternarDesenho,
+}) {
   return (
     <div className="absolute left-4 right-4 top-4 z-[1000] flex items-center gap-3 rounded-2xl border border-base-4 bg-base-3 px-4 py-2.5 shadow-sm">
       <span className="text-sm font-semibold text-texto">Pé-rímetro</span>
@@ -31,6 +39,17 @@ export default function CabecalhoMapa({ busca, aoMudarBusca, sugestoes, aoSeleci
           </ul>
         )}
       </div>
+
+      <Button
+        type="button"
+        variante={desenhando ? "secundario" : "primario"}
+        onClick={aoAlternarDesenho}
+        aria-label={desenhando ? "Cancelar o traçado do trecho" : "Adicionar trecho"}
+        title={desenhando ? "Cancelar o traçado do trecho" : "Adicionar trecho"}
+      >
+        <Route size={16} />
+        <span className="hidden sm:inline">{desenhando ? "Cancelar traçado" : "Adicionar trecho"}</span>
+      </Button>
 
       <ThemeToggle />
     </div>

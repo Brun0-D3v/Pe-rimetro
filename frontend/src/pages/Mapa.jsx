@@ -1,14 +1,20 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Card from "../components/ui/Card";
 import MapaLeaflet from "../components/mapa/MapaLeaflet";
 import PainelDetalheTrecho from "../components/mapa/PainelDetalheTrecho";
 import CabecalhoMapa from "../components/mapa/CabecalhoMapa";
 import PainelFiltros from "../components/mapa/PainelFiltros";
 import LegendaMapa from "../components/mapa/LegendaMapa";
-import CamadaCaminhabilidadeDemo from "../components/mapa/CamadaCaminhabilidadeDemo";
+import AvisoLocalizacao from "../components/mapa/AvisoLocalizacao";
+import CamadaDesenhoTrecho from "../components/mapa/CamadaDesenhoTrecho";
+import PainelNovoTrecho from "../components/mapa/PainelNovoTrecho";
 import { ThemeProvider, useTheme } from "../context/ThemeContext";
+import { useDesenhoTrecho } from "../hooks/useDesenhoTrecho";
+import { useLocalizacao } from "../hooks/useLocalizacao";
 import { useTrechos } from "../hooks/useTrechos";
 import { useRegioes } from "../hooks/useRegioes";
+import { criarTrecho } from "../services/trechoService";
+import { pontoMedio, regiaoMaisProxima } from "../utils/geometria";
 
 function MapaConteudo() {
   const { tema } = useTheme();
@@ -16,12 +22,37 @@ function MapaConteudo() {
   const [trechoSelecionado, setTrechoSelecionado] = useState(null);
   const [recolhido, setRecolhido] = useState(false);
   const [mostrarInativos, setMostrarInativos] = useState(true);
-  const [camadaDemoVisivel, setCamadaDemoVisivel] = useState(false);
   const [busca, setBusca] = useState("");
   const [focoBusca, setFocoBusca] = useState(null);
 
-  const { trechos, carregando, erro } = useTrechos(regiaoSelecionadaId || undefined);
+  const { trechos, carregando, erro, atualizarTrecho, adicionarTrecho } = useTrechos(regiaoSelecionadaId || undefined);
   const { regioes } = useRegioes();
+
+  const [desenhando, setDesenhando] = useState(false);
+  const [salvandoTrecho, setSalvandoTrecho] = useState(false);
+  const [erroTrecho, setErroTrecho] = useState(null);
+  const desenho = useDesenhoTrecho();
+
+  const { posicao: posicaoUsuario, precisao, estado: estadoLocalizacao, erro: erroLocalizacao, ativar } =
+    useLocalizacao();
+  const [pedidoCentralizar, setPedidoCentralizar] = useState(0);
+  const aguardandoPrimeiroFix = useRef(false);
+
+  function aoLocalizar() {
+    if (estadoLocalizacao === "ativo" && posicaoUsuario) {
+      setPedidoCentralizar((atual) => atual + 1);
+      return;
+    }
+    aguardandoPrimeiroFix.current = true;
+    ativar();
+  }
+
+  useEffect(() => {
+    if (estadoLocalizacao === "ativo" && posicaoUsuario && aguardandoPrimeiroFix.current) {
+      aguardandoPrimeiroFix.current = false;
+      setPedidoCentralizar((atual) => atual + 1);
+    }
+  }, [estadoLocalizacao, posicaoUsuario]);
 
   const trechosVisiveis = useMemo(
     () => (mostrarInativos ? trechos : trechos.filter((trecho) => trecho.status === "ATIVO")),
@@ -38,6 +69,50 @@ function MapaConteudo() {
     setTrechoSelecionado(trecho);
     setFocoBusca(trecho.geometria[0] ?? null);
     setBusca("");
+  }
+
+  function aoAvaliarTrecho(trechoAtualizado) {
+    atualizarTrecho(trechoAtualizado);
+    setTrechoSelecionado(trechoAtualizado);
+  }
+
+  function encerrarDesenho() {
+    setDesenhando(false);
+    setErroTrecho(null);
+    desenho.limpar();
+  }
+
+  function alternarDesenho() {
+    if (desenhando) {
+      encerrarDesenho();
+      return;
+    }
+    setTrechoSelecionado(null);
+    setDesenhando(true);
+  }
+
+  async function salvarTrecho({ nome, regiaoId }) {
+    setSalvandoTrecho(true);
+    setErroTrecho(null);
+    try {
+      const centro = pontoMedio(desenho.pontos);
+      const novoTrecho = await criarTrecho({
+        nome,
+        geometria: desenho.pontos,
+        latitude: centro.lat,
+        longitude: centro.lng,
+        regiaoId,
+      });
+      adicionarTrecho(novoTrecho);
+      setTrechoSelecionado(novoTrecho);
+      encerrarDesenho();
+    } catch (falha) {
+      setErroTrecho(
+        falha.response?.data?.mensagem ?? "Não foi possível salvar o trecho. Verifique a conexão e tente novamente."
+      );
+    } finally {
+      setSalvandoTrecho(false);
+    }
   }
 
   useEffect(() => {
@@ -70,11 +145,16 @@ function MapaConteudo() {
       <MapaLeaflet
         trechos={trechosVisiveis}
         trechoSelecionadoId={trechoSelecionado?.id}
-        onSelecionarTrecho={setTrechoSelecionado}
+        onSelecionarTrecho={desenhando ? () => {} : setTrechoSelecionado}
         tema={tema}
         focoBusca={focoBusca}
+        posicaoUsuario={posicaoUsuario}
+        precisaoUsuario={precisao}
+        pedidoCentralizar={pedidoCentralizar}
+        estadoLocalizacao={estadoLocalizacao}
+        aoLocalizar={aoLocalizar}
       >
-        {camadaDemoVisivel && <CamadaCaminhabilidadeDemo />}
+        {desenhando && <CamadaDesenhoTrecho pontos={desenho.pontos} aoAdicionarPonto={desenho.adicionarPonto} />}
       </MapaLeaflet>
 
       {trechosVisiveis.length === 0 && (
@@ -83,7 +163,14 @@ function MapaConteudo() {
         </p>
       )}
 
-      <CabecalhoMapa busca={busca} aoMudarBusca={setBusca} sugestoes={sugestoes} aoSelecionarSugestao={selecionarViaBusca} />
+      <CabecalhoMapa
+        busca={busca}
+        aoMudarBusca={setBusca}
+        sugestoes={sugestoes}
+        aoSelecionarSugestao={selecionarViaBusca}
+        desenhando={desenhando}
+        aoAlternarDesenho={alternarDesenho}
+      />
 
       <PainelFiltros
         recolhido={recolhido}
@@ -93,13 +180,39 @@ function MapaConteudo() {
         aoSelecionarRegiao={setRegiaoSelecionadaId}
         mostrarInativos={mostrarInativos}
         aoAlternarMostrarInativos={() => setMostrarInativos((atual) => !atual)}
-        camadaDemoVisivel={camadaDemoVisivel}
-        aoAlternarCamadaDemo={() => setCamadaDemoVisivel((atual) => !atual)}
       />
 
       <LegendaMapa className="absolute bottom-6 left-4 z-[1000]" />
 
-      <PainelDetalheTrecho trecho={trechoSelecionado} aoFechar={() => setTrechoSelecionado(null)} />
+      <AvisoLocalizacao
+        estado={estadoLocalizacao}
+        erro={erroLocalizacao}
+        className="absolute bottom-24 left-1/2 z-[1000] -translate-x-1/2"
+      />
+
+      {desenhando && (
+        <PainelNovoTrecho
+          pontos={desenho.pontos}
+          comprimento={desenho.comprimento}
+          motivoInvalido={desenho.motivoInvalido}
+          regioes={regioes}
+          regiaoSugeridaId={regiaoMaisProxima(desenho.pontos, trechos)}
+          regiaoTravadaId={regiaoSelecionadaId}
+          salvando={salvandoTrecho}
+          erro={erroTrecho}
+          aoDesfazer={desenho.desfazerPonto}
+          aoLimpar={desenho.limpar}
+          aoCancelar={encerrarDesenho}
+          aoSalvar={salvarTrecho}
+        />
+      )}
+
+      <PainelDetalheTrecho
+        key={trechoSelecionado?.id}
+        trecho={desenhando ? null : trechoSelecionado}
+        aoFechar={() => setTrechoSelecionado(null)}
+        aoAvaliado={aoAvaliarTrecho}
+      />
     </div>
   );
 }

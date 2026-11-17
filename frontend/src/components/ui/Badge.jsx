@@ -1,7 +1,7 @@
 // `tom` recebe uma classificação já decidida por quem chama o componente
-// (ex.: "bom" | "medio" | "ruim" para o Índice de Caminhabilidade, "neutro"
-// para status gerais). As faixas numéricas que definem essa classificação
-// ainda não foram decididas — ver "Classificação do Índice" no Vault.
+// ("bom" | "medio" | "ruim" para o Índice de Caminhabilidade, "neutro" para
+// status gerais). A faixa é calculada no backend (campo `classificacao`) e
+// traduzida para o tom em config/indiceConfig.js.
 const tonalidades = {
   bom: "bg-indice-bom/15 text-indice-bom",
   medio: "bg-indice-medio/15 text-indice-medio",

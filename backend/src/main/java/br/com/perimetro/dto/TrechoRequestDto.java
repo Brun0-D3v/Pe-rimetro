@@ -1,6 +1,7 @@
 package br.com.perimetro.dto;
 
 import br.com.perimetro.entity.AtivoInativo;
+import br.com.perimetro.validation.GeometriaValida;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -15,6 +16,7 @@ public class TrechoRequestDto {
     private final String nome;
 
     @NotNull(message = "geometria é obrigatória")
+    @GeometriaValida
     private final List<PontoDto> geometria;
 
     @NotNull(message = "latitude é obrigatória")

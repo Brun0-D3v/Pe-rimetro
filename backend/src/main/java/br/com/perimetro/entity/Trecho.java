@@ -43,6 +43,9 @@ public class Trecho {
     @Column(name = "indice_atual", precision = 4, scale = 2)
     private BigDecimal indiceAtual;
 
+    @Column(name = "total_avaliacoes", nullable = false)
+    private int totalAvaliacoes;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private AtivoInativo status;
@@ -102,6 +105,16 @@ public class Trecho {
 
     public BigDecimal getIndiceAtual() {
         return indiceAtual;
+    }
+
+    public int getTotalAvaliacoes() {
+        return totalAvaliacoes;
+    }
+
+    // Único ponto de escrita do índice: chamado pelo AvaliacaoService após recalcular.
+    public void registrarIndice(BigDecimal indiceAtual, int totalAvaliacoes) {
+        this.indiceAtual = indiceAtual;
+        this.totalAvaliacoes = totalAvaliacoes;
     }
 
     public AtivoInativo getStatus() {
